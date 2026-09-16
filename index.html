@@ -9,8 +9,8 @@
       content="Pick your photos, make a sheet, and print. A private photo printing tool for the Creativity Lab."
     />
     <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-title" content="Photo Sheet" />
-    <title>Photo Sheet · v1.00</title>
+    <meta name="apple-mobile-web-app-title" content="COMPASS Photo Printing" />
+    <title>COMPASS Photo Printing · v1.00</title>
     <link rel="icon" href="icons/icon.svg" type="image/svg+xml" />
     <link rel="apple-touch-icon" href="icons/icon-192.png" />
     <link rel="manifest" href="manifest.webmanifest" />
@@ -19,21 +19,18 @@
   </head>
   <body>
     <header class="app-header screen-only">
-      <a class="brand" href="./" aria-label="Photo Sheet home"
+      <a class="brand" href="./" aria-label="COMPASS Photo Printing home"
         ><span class="brand-mark" aria-hidden="true">▧</span
         ><span
-          >Photo Sheet<span class="brand-sub">THE CREATIVITY LAB</span></span
+          >COMPASS Photo Printing<span class="brand-sub">THE CREATIVITY LAB</span
+          ></span
         ></a
-      >
-      <span class="privacy"
-        ><span aria-hidden="true">◈</span> Your photos stay on this iPad.</span
       >
     </header>
     <main>
       <section class="intro screen-only">
         <div>
-          <p class="eyebrow">LITTLE MOMENTS. BIG IDEAS.</p>
-          <h1>Your photos. Ready to print.</h1>
+          <h1>Only print what you need for your journal.</h1>
           <p>Pick a few favorites. Make a sheet. Bring them to life.</p>
         </div>
         <span class="paper-badge">US Letter <span>8.5 × 11 in</span></span>
@@ -85,7 +82,7 @@
         <section class="preview-area" aria-label="Print preview">
           <div class="preview-heading screen-only">
             <h2>Your print preview</h2>
-            <span id="page-count">A blank page. So many possibilities.</span>
+            <span id="page-count"></span>
           </div>
           <div id="empty" class="empty-state screen-only">
             <div class="sample-sheet" aria-hidden="true">
@@ -106,9 +103,6 @@
             <p>
               Choose your photos and we’ll make room<br />for every one of them.
             </p>
-            <button id="empty-choose" class="button secondary">
-              ＋ Choose Photos
-            </button>
             <div class="mini-steps">
               <span>1. Pick photos</span><span>2. Pick a layout</span
               ><span>3. Print</span>
@@ -133,15 +127,14 @@
         ><span id="ready-detail">Your next project starts here.</span>
       </div>
       <div class="footer-actions">
-        <button id="add" class="button secondary">＋ Add Photos</button
-        ><button id="print" class="button primary" disabled>
+        <button id="print" class="button primary" disabled>
           <span aria-hidden="true">▤</span> Print
           <span aria-hidden="true">↗</span>
         </button>
       </div>
     </footer>
     <div class="version screen-only">
-      PHOTO SHEET <span>v1.00</span> · MADE FOR MAKING
+      COMPASS PHOTO PRINTING <span>v1.00</span>
     </div>
     <dialog
       id="editor"

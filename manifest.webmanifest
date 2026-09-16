@@ -1,7 +1,7 @@
 {
   "id": "./",
-  "name": "Photo Sheet",
-  "short_name": "Photo Sheet",
+  "name": "COMPASS Photo Printing",
+  "short_name": "COMPASS Photo Printing",
   "description": "Private photo sheets for the Creativity Lab. v1.00",
   "start_url": "./",
   "scope": "./",
