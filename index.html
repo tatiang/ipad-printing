@@ -1,0 +1,248 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#176855" />
+    <meta
+      name="description"
+      content="Pick your photos, make a sheet, and print. A private photo printing tool for the Creativity Lab."
+    />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content="Photo Sheet" />
+    <title>Photo Sheet · v1.00</title>
+    <link rel="icon" href="icons/icon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="icons/icon-192.png" />
+    <link rel="manifest" href="manifest.webmanifest" />
+    <link rel="stylesheet" href="style_v1.00.css" />
+    <script type="module" src="app_v1.00.js"></script>
+  </head>
+  <body>
+    <header class="app-header screen-only">
+      <a class="brand" href="./" aria-label="Photo Sheet home"
+        ><span class="brand-mark" aria-hidden="true">▧</span
+        ><span
+          >Photo Sheet<span class="brand-sub">THE CREATIVITY LAB</span></span
+        ></a
+      >
+      <span class="privacy"
+        ><span aria-hidden="true">◈</span> Your photos stay on this iPad.</span
+      >
+    </header>
+    <main>
+      <section class="intro screen-only">
+        <div>
+          <p class="eyebrow">LITTLE MOMENTS. BIG IDEAS.</p>
+          <h1>Your photos. Ready to print.</h1>
+          <p>Pick a few favorites. Make a sheet. Bring them to life.</p>
+        </div>
+        <span class="paper-badge">US Letter <span>8.5 × 11 in</span></span>
+      </section>
+      <div class="workspace">
+        <aside class="controls screen-only" aria-label="Make your photo sheet">
+          <section class="control-section">
+            <h2><span class="step">1</span> Choose photos</h2>
+            <p>From your camera roll to your next creation.</p>
+            <button id="choose" class="button primary full">
+              ＋ Choose Photos</button
+            ><input
+              id="photo-input"
+              type="file"
+              accept="image/*"
+              multiple
+              hidden
+            />
+            <p id="photo-count" class="small">
+              Up to 30 photos · JPEG, PNG & more
+            </p>
+          </section>
+          <section class="control-section">
+            <h2><span class="step">2</span> Choose a layout</h2>
+            <p>How many photos on each page?</p>
+            <div
+              id="layouts"
+              class="layout-options"
+              role="group"
+              aria-label="Photos per page"
+            ></div>
+            <label class="toggle"
+              ><input id="cut-guides" type="checkbox" /><span>Cut guides</span
+              ><span class="optional">optional</span></label
+            >
+          </section>
+          <section class="control-section last">
+            <h2><span class="step">3</span> Make it yours</h2>
+            <p>Tap a photo to rotate, zoom, or move it inside its frame.</p>
+            <div class="tip">
+              <span aria-hidden="true">✦</span
+              ><span>A little crop can make a big difference.</span>
+            </div>
+          </section>
+          <button id="reset" class="text-button full" disabled>
+            ↺ Start Over
+          </button>
+        </aside>
+        <section class="preview-area" aria-label="Print preview">
+          <div class="preview-heading screen-only">
+            <h2>Your print preview</h2>
+            <span id="page-count">A blank page. So many possibilities.</span>
+          </div>
+          <div id="empty" class="empty-state screen-only">
+            <div class="sample-sheet" aria-hidden="true">
+              <div class="sample-photo lavender">
+                <span class="sun"></span><span class="mountain"></span>
+              </div>
+              <div class="sample-photo peach">
+                <span class="flower">✳</span>
+              </div>
+              <div class="sample-photo gold">
+                <span class="scribble">✺</span>
+              </div>
+              <div class="sample-photo mint">
+                <span class="sun"></span><span class="mountain"></span>
+              </div>
+            </div>
+            <h2>Good things start with a photo.</h2>
+            <p>
+              Choose your photos and we’ll make room<br />for every one of them.
+            </p>
+            <button id="empty-choose" class="button secondary">
+              ＋ Choose Photos
+            </button>
+            <div class="mini-steps">
+              <span>1. Pick photos</span><span>2. Pick a layout</span
+              ><span>3. Print</span>
+            </div>
+          </div>
+          <div id="pages"></div>
+          <p id="preview-note" class="preview-note screen-only" hidden>
+            Tap any photo to adjust it. Blank spaces won’t print.
+          </p>
+        </section>
+      </div>
+      <p
+        id="status"
+        class="status screen-only"
+        role="status"
+        aria-live="polite"
+      ></p>
+    </main>
+    <footer class="bottom-bar screen-only">
+      <div>
+        <strong id="ready-label">Let’s make something.</strong
+        ><span id="ready-detail">Your next project starts here.</span>
+      </div>
+      <div class="footer-actions">
+        <button id="add" class="button secondary">＋ Add Photos</button
+        ><button id="print" class="button primary" disabled>
+          <span aria-hidden="true">▤</span> Print
+          <span aria-hidden="true">↗</span>
+        </button>
+      </div>
+    </footer>
+    <div class="version screen-only">
+      PHOTO SHEET <span>v1.00</span> · MADE FOR MAKING
+    </div>
+    <dialog
+      id="editor"
+      aria-labelledby="editor-title"
+      aria-describedby="editor-help"
+    >
+      <div class="editor-header">
+        <div>
+          <p class="eyebrow">MAKE IT YOURS</p>
+          <h2 id="editor-title">Adjust photo</h2>
+        </div>
+        <button id="done" class="button primary" autofocus>Done ✓</button>
+      </div>
+      <p id="editor-help">
+        Drag to move. Pinch to zoom. Or use the buttons below.
+      </p>
+      <div class="editor-stage">
+        <div
+          id="edit-frame"
+          class="photo-frame"
+          tabindex="0"
+          role="img"
+          aria-label="Photo crop. Use arrow keys to move the photo; plus or minus to zoom."
+        ></div>
+      </div>
+      <div class="edit-tools">
+        <button id="rotate" class="button secondary">↻ Rotate</button>
+        <div class="zoom-controls">
+          <button id="zoom-out" class="button secondary" aria-label="Zoom out">
+            −</button
+          ><label for="zoom">Zoom <output id="zoom-value">100%</output></label
+          ><input
+            id="zoom"
+            type="range"
+            min="1"
+            max="4"
+            step="0.05"
+            value="1"
+          /><button id="zoom-in" class="button secondary" aria-label="Zoom in">
+            ＋
+          </button>
+        </div>
+      </div>
+      <div
+        class="pan-controls"
+        role="group"
+        aria-label="Move photo inside frame"
+      >
+        <span>Move photo</span
+        ><button
+          class="button secondary"
+          data-pan="-1,0"
+          aria-label="Move photo left"
+        >
+          ←</button
+        ><button
+          class="button secondary"
+          data-pan="0,-1"
+          aria-label="Move photo up"
+        >
+          ↑</button
+        ><button
+          class="button secondary"
+          data-pan="0,1"
+          aria-label="Move photo down"
+        >
+          ↓</button
+        ><button
+          class="button secondary"
+          data-pan="1,0"
+          aria-label="Move photo right"
+        >
+          →
+        </button>
+      </div>
+      <div class="editor-bottom">
+        <div class="order-controls">
+          <span id="order-label">Photo 1</span
+          ><button id="earlier" class="button secondary">← Earlier</button
+          ><button id="later" class="button secondary">Later →</button>
+        </div>
+        <button id="reset-crop" class="text-button">Reset crop</button
+        ><button id="remove" class="text-button danger">⌫ Remove photo</button>
+      </div>
+    </dialog>
+    <dialog id="reset-dialog" aria-labelledby="reset-title">
+      <h2 id="reset-title">Start a new sheet?</h2>
+      <p>
+        This clears the photos and edits from this sheet.<br />Your original
+        photos stay in your library.
+      </p>
+      <div class="confirm-actions">
+        <button id="cancel-reset" class="button secondary" autofocus>
+          Keep my sheet</button
+        ><button id="confirm-reset" class="button primary">Start Over</button>
+      </div>
+    </dialog>
+    <noscript
+      ><p class="status">
+        Turn on JavaScript in Safari to make a photo sheet.
+      </p></noscript
+    >
+  </body>
+</html>
