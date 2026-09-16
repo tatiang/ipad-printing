@@ -1,6 +1,6 @@
-# Photo Sheet — v1.00
+# COMPASS Photo Printing — v1.00
 
-A private, static photo-sheet maker for K–8 students using iPad Safari. Choose photos, pick **1, 2, 4, 6, or 9 per page**, tap a photo to adjust it, and print through the normal iPadOS/AirPrint interface. No accounts, uploads, database, runtime dependencies, or build step.
+A private, static photo-sheet maker for K–8 students using iPad Safari. Choose photos, pick **4, 6, or 9 per page** (1 and 2 remain visible but disabled), tap a photo to adjust it, and print through the normal iPadOS/AirPrint interface. No accounts, uploads, database, runtime dependencies, or build step.
 
 ## Run locally
 
@@ -23,7 +23,7 @@ No `vercel.json`, environment variables, backend, or database is needed. This re
 
 ## Student workflow
 
-1. **Choose Photos** → Photo Library → select multiple photos → Add.
+1. **Choose Photos** → Photo Library → select multiple photos → Add. Use this same button to add more photos later.
 2. Select a **photos per page** button. Four per page is the default.
 3. Tap any photo. Drag to pan, pinch or use buttons/slider to zoom, and tap **Rotate** for 90° clockwise steps. Edits save immediately; **Done** or Escape closes the editor.
 4. Use **Earlier / Later** to reorder, **Remove photo** to delete from this sheet, or **Reset crop** to undo that photo’s adjustments.
@@ -126,7 +126,7 @@ The offline check stops an isolated test server, rather than relying on WebKit�
 - [ ] Open the HTTPS site in current Safari on the school-managed iPad.
 - [ ] Choose Photos opens the native picker; cancelling changes nothing; select multiple files.
 - [ ] Import portrait camera JPEG and HEIC/HEIF; confirm correct EXIF orientation. Test a PNG and a rejected/broken file.
-- [ ] Test 1 portrait / 1-per-page; 2 landscape / 2-per-page; 4 mixed / 4-per-page; 6 / 6-per-page; 9 / 9-per-page.
+- [ ] Confirm 1-per-page and 2-per-page are disabled. Test 4 mixed / 4-per-page; 6 / 6-per-page; 9 / 9-per-page.
 - [ ] Import 14 photos, select 9: **2 pages**, last page has five photos. Import 10, select 4: **3 pages**, last page has two.
 - [ ] Tap a photo; rotate 90°, 180°, 270°, then 360°. Pinch in/out, pan to every edge, lift one finger and keep dragging. No exposed blank frame space.
 - [ ] Check zoom buttons/slider, four move buttons, Reset crop, Done, keyboard focus, Escape and VoiceOver labels.

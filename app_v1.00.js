@@ -46,7 +46,7 @@ function createPhotoId() {
 
 function setBusy(busy) {
   state.busy = busy;
-  for (const id of ["choose", "empty-choose", "add", "photo-input"])
+  for (const id of ["choose", "photo-input"])
     $(id).disabled = busy;
   $("reset").disabled = busy || !state.photos.length;
   $("print").disabled = busy || !state.photos.length || !previewReady;
@@ -59,6 +59,7 @@ function renderLayouts() {
     const button = document.createElement("button");
     button.className = "layout-option";
     button.dataset.count = count;
+    button.disabled = Number(count) < 4;
     button.setAttribute("aria-label", `${count} photos per page`);
     const icon = document.createElement("span");
     icon.className = "layout-icon";
@@ -159,7 +160,7 @@ function render() {
     : "Up to 30 photos · JPEG, PNG & more";
   $("page-count").textContent = count
     ? `${groups.length} ${groups.length === 1 ? "page" : "pages"} · US Letter`
-    : "A blank page. So many possibilities.";
+    : "";
   $("ready-label").textContent = count
     ? `${groups.length} ${groups.length === 1 ? "page" : "pages"} to make your own.`
     : "Let’s make something.";
@@ -465,8 +466,7 @@ $("photo-input").addEventListener("change", (event) => {
   event.target.value = "";
   importPhotos(files);
 });
-for (const id of ["choose", "empty-choose", "add"])
-  $(id).addEventListener("click", () => $("photo-input").click());
+$("choose").addEventListener("click", () => $("photo-input").click());
 $("cut-guides").addEventListener("change", (event) => {
   state.cutGuides = event.target.checked;
   render();

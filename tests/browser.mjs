@@ -263,8 +263,6 @@ for (const [engine, browserType] of [
       await page.emulateMedia({ media: "screen" });
     };
     for (const [count, perPage, expected] of [
-      [1, 1, 1],
-      [2, 2, 1],
       [4, 4, 1],
       [6, 6, 1],
       [9, 9, 1],
@@ -281,7 +279,7 @@ for (const [engine, browserType] of [
       await reset();
     }
     console.log(
-      `${engine}: all 7 layout/page-count cases and print media passed`,
+      `${engine}: all 5 enabled layout/page-count cases and print media passed`,
     );
     await importFiles(files.slice(0, 10));
     const firstId = await page
