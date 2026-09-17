@@ -118,6 +118,11 @@ for (const [engine, browserType] of [
     await page.locator(".layout-option").first().waitFor();
     assert.equal(await page.locator(".layout-option").count(), 5);
     assert.equal(await page.locator("#print").isDisabled(), true);
+    assert.equal(
+      await page.locator('[data-count="9"]').getAttribute("aria-pressed"),
+      "true",
+    );
+    assert.equal(await page.locator("#preparing").isHidden(), true);
     await page.screenshot({
       path: `test-results/${engine}-empty.png`,
       fullPage: true,
@@ -154,11 +159,26 @@ for (const [engine, browserType] of [
       ...(i % 2 ? landscape : portrait),
       name: `photo-${i + 1}.png`,
     }));
-    const importFiles = async (list) => {
+    const importFiles = async (list, observeProgress = false) => {
       await page.locator("#photo-input").setInputFiles(list);
+      if (observeProgress) {
+        await page.locator("#preparing").waitFor({ state: "visible" });
+        assert.equal(
+          await page.locator("#preparing-progress").getAttribute("aria-valuemax"),
+          String(list.length),
+        );
+        assert.match(
+          await page.locator("#preparing-detail").textContent(),
+          new RegExp(`Photo \\d+ of ${list.length}`),
+        );
+        await page.screenshot({
+          path: `test-results/${engine}-preparing.png`,
+        });
+      }
       await page.waitForFunction(
         () => !document.getElementById("choose").disabled,
       );
+      assert.equal(await page.locator("#preparing").isHidden(), true);
       if (list.length && (await page.locator("#pages img").count()))
         await page.waitForFunction(
           () => !document.getElementById("print").disabled,
@@ -263,6 +283,8 @@ for (const [engine, browserType] of [
       await page.emulateMedia({ media: "screen" });
     };
     for (const [count, perPage, expected] of [
+      [1, 1, 1],
+      [2, 2, 1],
       [4, 4, 1],
       [6, 6, 1],
       [9, 9, 1],
@@ -271,6 +293,7 @@ for (const [engine, browserType] of [
     ]) {
       await importFiles(
         count === 2 ? [landscape, landscape] : files.slice(0, count),
+        count === 14,
       );
       await page.locator(`[data-count="${perPage}"]`).click();
       assert.equal(await page.locator(".sheet").count(), expected);
@@ -279,8 +302,9 @@ for (const [engine, browserType] of [
       await reset();
     }
     console.log(
-      `${engine}: all 5 enabled layout/page-count cases and print media passed`,
+      `${engine}: all layout/page-count cases, progress UI and print media passed`,
     );
+    await page.locator('[data-count="4"]').click();
     await importFiles(files.slice(0, 10));
     const firstId = await page
       .locator(".photo-frame")
@@ -424,7 +448,7 @@ for (const [engine, browserType] of [
     assert.equal(await page.locator("#pages img").count(), 9);
     await reset();
     assert.equal(
-      await page.locator('[data-count="4"]').getAttribute("aria-pressed"),
+      await page.locator('[data-count="9"]').getAttribute("aria-pressed"),
       "true",
     );
     assert.equal(await page.locator("#cut-guides").isChecked(), false);

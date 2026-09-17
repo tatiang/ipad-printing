@@ -1,6 +1,6 @@
-# COMPASS Photo Printing — v1.00
+# COMPASS Photo Printing — v1.01
 
-A private, static photo-sheet maker for K–8 students using iPad Safari. Choose photos, pick **4, 6, or 9 per page** (1 and 2 remain visible but disabled), tap a photo to adjust it, and print through the normal iPadOS/AirPrint interface. No accounts, uploads, database, runtime dependencies, or build step.
+A private, static photo-sheet maker for K–8 students using iPad Safari. Choose photos, pick **1, 2, 4, 6, or 9 per page**, tap a photo to adjust it, and print through the normal iPadOS/AirPrint interface. No accounts, uploads, database, runtime dependencies, or build step.
 
 ## Run locally
 
@@ -18,13 +18,14 @@ Open <http://localhost:8000>. Do not use `file://`: ES modules and service worke
 2. Choose **Other** for the framework, repository root for Root Directory, no Build Command, and `.` for Output Directory. No install command is needed.
 3. Deploy and open the resulting HTTPS URL in Safari.
 4. A Git-connected project can create preview deployments for pull requests once configured in Vercel.
+5. For school use, attach a dedicated custom subdomain such as `photos.tatian.app` in Vercel and allow that exact hostname in the managed web filter. Keep the repository on GitHub as the source; students use only the custom URL.
 
-No `vercel.json`, environment variables, backend, or database is needed. This repository does not provision a hosting account or change billing. A live URL is not implied by committing the source.
+No `vercel.json`, environment variables, backend, or database is needed. The app makes no third-party runtime requests, so the custom hostname is the only web origin students need for the app itself. This repository does not provision a hosting account, DNS, or billing. A live URL is not implied by committing the source.
 
 ## Student workflow
 
 1. **Choose Photos** → Photo Library → select multiple photos → Add. Use this same button to add more photos later.
-2. Select a **photos per page** button. Four per page is the default.
+2. Select a **photos per page** button. Nine per page is the default.
 3. Tap any photo. Drag to pan, pinch or use buttons/slider to zoom, and tap **Rotate** for 90° clockwise steps. Edits save immediately; **Done** or Escape closes the editor.
 4. Use **Earlier / Later** to reorder, **Remove photo** to delete from this sheet, or **Reset crop** to undo that photo’s adjustments.
 5. Optionally turn on **Cut guides**. Tap **Print**, choose the AirPrint printer and US Letter portrait paper, check the page count, then print.
@@ -71,7 +72,7 @@ A maximum of 30 photos, 40 MiB per source file, and 64 megapixels per decoded so
 - Each wrapper forces a page break except the last. Empty slots have no DOM image, so they print white.
 - Navigation, controls, dialogs, status, page labels and photo badges use print hiding rules. Only composed sheets print.
 - Cut guides use subtle dashed borders centered in the gaps, never over photos.
-- Print remains disabled until all working preview images are decoded. The click calls `window.print()` synchronously, preserving the browser’s user gesture.
+- A blocking, determinate progress card shows current/total preparation while files are decoded sequentially. Print remains disabled until all working preview images are decoded. The click calls `window.print()` synchronously, preserving the browser’s user gesture.
 - Crops are percentage-based and use identical frame proportions in preview/editor/print, independent of viewport dimensions.
 
 Browsers and printer settings ultimately control paper size, scaling, headers/footers, and image color. Select **US Letter, portrait, 100% / actual size** where available; turn off browser headers/footers. Do not select the printer’s multiple-pages-per-sheet feature. A printer requiring more than 0.25-inch margins can clip edges; verify the school printer before classroom rollout.
@@ -103,8 +104,8 @@ The service worker caches only an explicit list of bundled shell files. It does 
 No tools are required to serve the app beyond a static server. Node 20+ runs the dependency-free unit tests:
 
 ```sh
-node --check app_v1.00.js
-node --check images_v1.00.js
+node --experimental-default-type=module --check app_v1.00.js
+node --experimental-default-type=module --check images_v1.00.js
 node --check service-worker.js
 node --check geometry_v1.00.mjs
 node --test tests/geometry.test.mjs
@@ -126,7 +127,7 @@ The offline check stops an isolated test server, rather than relying on WebKit�
 - [ ] Open the HTTPS site in current Safari on the school-managed iPad.
 - [ ] Choose Photos opens the native picker; cancelling changes nothing; select multiple files.
 - [ ] Import portrait camera JPEG and HEIC/HEIF; confirm correct EXIF orientation. Test a PNG and a rejected/broken file.
-- [ ] Confirm 1-per-page and 2-per-page are disabled. Test 4 mixed / 4-per-page; 6 / 6-per-page; 9 / 9-per-page.
+- [ ] Confirm 9-per-page is selected on a fresh sheet. Test 1, 2, 4, 6, and 9-per-page layouts.
 - [ ] Import 14 photos, select 9: **2 pages**, last page has five photos. Import 10, select 4: **3 pages**, last page has two.
 - [ ] Tap a photo; rotate 90°, 180°, 270°, then 360°. Pinch in/out, pan to every edge, lift one finger and keep dragging. No exposed blank frame space.
 - [ ] Check zoom buttons/slider, four move buttons, Reset crop, Done, keyboard focus, Escape and VoiceOver labels.
@@ -142,4 +143,4 @@ The offline check stops an isolated test server, rather than relying on WebKit�
 
 ## Known limitations / release status
 
-v1.00 is portrait Letter only, with no cloud drafts or photo recovery after refresh. Very large files, unsupported codecs and excessive batches are rejected politely. Working-image normalization trades some source resolution for iPad memory safety. Browser/OS printing can override CSS preferences. Physical iPad/AirPrint QA is required before calling the deployment classroom-validated; software tests alone do not prove hardware acceptance.
+v1.01 is portrait Letter only, with no cloud drafts or photo recovery after refresh. Very large files, unsupported codecs and excessive batches are rejected politely. Working-image normalization trades some source resolution for iPad memory safety. Browser/OS printing can override CSS preferences. Physical iPad/AirPrint QA is required before calling the deployment classroom-validated; software tests alone do not prove hardware acceptance.

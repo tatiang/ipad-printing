@@ -1,6 +1,6 @@
-# COMPASS Photo Printing v1.00
+# COMPASS Photo Printing v1.01
 
-COMPASS Photo Printing turns an iPad photo selection into composed US Letter sheets, ready for the native AirPrint interface. This initial release includes three enabled layouts (4, 6 and 9 per page; 1 and 2 are disabled), local crop/zoom/rotation, accessible ordering and removal, optional cut guides, and an offline-capable app shell.
+COMPASS Photo Printing turns an iPad photo selection into composed US Letter sheets, ready for the native AirPrint interface. This release defaults new sheets to 9-up, enables all five layouts (1, 2, 4, 6 and 9 per page), adds clear current/total preparation progress, and gives students a more visual Add → Layout → Print workflow. Local crop/zoom/rotation, accessible ordering and removal, optional cut guides, and the offline-capable app shell remain intact.
 
 ## Architecture and privacy
 
@@ -21,3 +21,7 @@ Native iPadOS Photos picker, real iPad touch/HEIC variants, Home Screen printing
 ## COMPASS interface update
 
 Rename the app and Home Screen title to COMPASS Photo Printing, emphasize printing only what is needed for a journal, remove the requested decorative text and duplicate import buttons, and keep a single Choose Photos button for initial and additional selections. Bump the app-shell cache so existing installations can receive the updated UI after closing all app windows.
+
+## Student-first workflow update
+
+Use larger illustrated controls, a three-step visual path, a 9-up paper preview, and a high-contrast print action so the workflow can be understood with minimal reading. While the app prepares selected images, a blocking progress card now shows the current photo, total count, and determinate completion bar. The app remains dependency-free and keeps all photo processing on the device.

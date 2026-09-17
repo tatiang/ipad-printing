@@ -10,7 +10,7 @@
     />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-title" content="COMPASS Photo Printing" />
-    <title>COMPASS Photo Printing · v1.00</title>
+    <title>COMPASS Photo Printing · v1.01</title>
     <link rel="icon" href="icons/icon.svg" type="image/svg+xml" />
     <link rel="apple-touch-icon" href="icons/icon-192.png" />
     <link rel="manifest" href="manifest.webmanifest" />
@@ -30,18 +30,22 @@
     <main>
       <section class="intro screen-only">
         <div>
-          <h1>Only print what you need for your journal.</h1>
-          <p>Pick a few favorites. Make a sheet. Bring them to life.</p>
+          <p class="eyebrow">CREATIVITY LAB TOOL</p>
+          <h1>Photos <span aria-hidden="true">→</span> paper.</h1>
         </div>
-        <span class="paper-badge">US Letter <span>8.5 × 11 in</span></span>
+        <ol class="journey" aria-label="Three steps: add photos, choose a layout, then print">
+          <li class="current"><b aria-hidden="true">＋</b><span>Add</span></li>
+          <li><b aria-hidden="true">▦</b><span>Layout</span></li>
+          <li><b aria-hidden="true">↗</b><span>Print</span></li>
+        </ol>
       </section>
       <div class="workspace">
         <aside class="controls screen-only" aria-label="Make your photo sheet">
-          <section class="control-section">
-            <h2><span class="step">1</span> Choose photos</h2>
-            <p>From your camera roll to your next creation.</p>
+          <section class="control-section choose-section">
+            <h2><span class="step">1</span> Add photos</h2>
             <button id="choose" class="button primary full">
-              ＋ Choose Photos</button
+              <span class="button-icon" aria-hidden="true">＋</span>
+              <span>Choose Photos</span></button
             ><input
               id="photo-input"
               type="file"
@@ -49,13 +53,10 @@
               multiple
               hidden
             />
-            <p id="photo-count" class="small">
-              Up to 30 photos · JPEG, PNG & more
-            </p>
+            <p id="photo-count" class="photo-count">0 / 30 photos</p>
           </section>
           <section class="control-section">
-            <h2><span class="step">2</span> Choose a layout</h2>
-            <p>How many photos on each page?</p>
+            <h2><span class="step">2</span> Photos on each page</h2>
             <div
               id="layouts"
               class="layout-options"
@@ -63,20 +64,16 @@
               aria-label="Photos per page"
             ></div>
             <label class="toggle"
-              ><input id="cut-guides" type="checkbox" /><span>Cut guides</span
-              ><span class="optional">optional</span></label
+              ><input id="cut-guides" type="checkbox" /><span aria-hidden="true">✂</span
+              ><span>Cut lines</span></label
             >
           </section>
-          <section class="control-section last">
-            <h2><span class="step">3</span> Make it yours</h2>
-            <p>Tap a photo to rotate, zoom, or move it inside its frame.</p>
-            <div class="tip">
-              <span aria-hidden="true">✦</span
-              ><span>A little crop can make a big difference.</span>
-            </div>
+          <section class="adjust-cue">
+            <span class="adjust-icon" aria-hidden="true">↻</span>
+            <span><strong>Tap a photo</strong><small>rotate · zoom · crop</small></span>
           </section>
           <button id="reset" class="text-button full" disabled>
-            ↺ Start Over
+            ↺ Clear all
           </button>
         </aside>
         <section class="preview-area" aria-label="Print preview">
@@ -98,15 +95,15 @@
               <div class="sample-photo mint">
                 <span class="sun"></span><span class="mountain"></span>
               </div>
+              <div class="sample-photo coral"><span class="flower">✦</span></div>
+              <div class="sample-photo blue"><span class="scribble">◒</span></div>
+              <div class="sample-photo gold"><span class="flower">✿</span></div>
+              <div class="sample-photo lavender"><span class="scribble">⌁</span></div>
+              <div class="sample-photo peach"><span class="flower">●</span></div>
             </div>
-            <h2>Good things start with a photo.</h2>
-            <p>
-              Choose your photos and we’ll make room<br />for every one of them.
-            </p>
-            <div class="mini-steps">
-              <span>1. Pick photos</span><span>2. Pick a layout</span
-              ><span>3. Print</span>
-            </div>
+            <div class="empty-arrow" aria-hidden="true">↖</div>
+            <h2>Choose photos to start</h2>
+            <p>They stay on this iPad.</p>
           </div>
           <div id="pages"></div>
           <p id="preview-note" class="preview-note screen-only" hidden>
@@ -121,6 +118,36 @@
         aria-live="polite"
       ></p>
     </main>
+    <div
+      id="preparing"
+      class="preparing-overlay screen-only"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="preparing-title"
+      aria-describedby="preparing-detail preparing-hint"
+      hidden
+    >
+      <div class="preparing-card">
+        <div class="photo-stack" aria-hidden="true">
+          <span></span><span></span><span>✦</span>
+        </div>
+        <p class="eyebrow">PLEASE WAIT</p>
+        <h2 id="preparing-title">Getting photos ready</h2>
+        <p id="preparing-detail" aria-live="polite">Starting…</p>
+        <div
+          id="preparing-progress"
+          class="progress-track"
+          role="progressbar"
+          aria-label="Photo preparation progress"
+          aria-valuemin="0"
+          aria-valuemax="1"
+          aria-valuenow="0"
+        >
+          <span id="preparing-bar"></span>
+        </div>
+        <p id="preparing-hint" class="preparing-hint">Keep this screen open</p>
+      </div>
+    </div>
     <footer class="bottom-bar screen-only">
       <div>
         <strong id="ready-label">Let’s make something.</strong
@@ -134,7 +161,7 @@
       </div>
     </footer>
     <div class="version screen-only">
-      COMPASS PHOTO PRINTING <span>v1.00</span>
+      COMPASS PHOTO PRINTING <span>v1.01</span>
     </div>
     <dialog
       id="editor"

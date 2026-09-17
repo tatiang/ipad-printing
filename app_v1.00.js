@@ -17,7 +17,7 @@ import {
 const $ = (id) => document.getElementById(id);
 const state = {
   photos: [],
-  layout: { photosPerPage: 4, pageOrientation: "portrait" },
+  layout: { photosPerPage: 9, pageOrientation: "portrait" },
   cutGuides: false,
   busy: false,
   editingId: null,
@@ -48,10 +48,26 @@ function setBusy(busy) {
   state.busy = busy;
   for (const id of ["choose", "photo-input"])
     $(id).disabled = busy;
+  for (const button of $("layouts").children) button.disabled = busy;
+  $("cut-guides").disabled = busy;
   $("reset").disabled = busy || !state.photos.length;
   $("print").disabled = busy || !state.photos.length || !previewReady;
-  $("choose").textContent = busy ? "Getting photos ready…" : "＋ Choose Photos";
+  $("preparing").hidden = !busy;
+  document.body.classList.toggle("is-preparing", busy);
   $("pages").setAttribute("aria-busy", String(busy));
+}
+
+function updatePreparationProgress(completed, total) {
+  const maximum = Math.max(1, total);
+  const current = clamp(completed, 0, maximum);
+  const progress = $("preparing-progress");
+  progress.setAttribute("aria-valuemax", String(maximum));
+  progress.setAttribute("aria-valuenow", String(current));
+  $("preparing-bar").style.width = `${(current / maximum) * 100}%`;
+  $("preparing-detail").textContent =
+    current < maximum
+      ? `Photo ${current + 1} of ${maximum}`
+      : `${maximum} ${maximum === 1 ? "photo" : "photos"} ready`;
 }
 
 function renderLayouts() {
@@ -59,7 +75,6 @@ function renderLayouts() {
     const button = document.createElement("button");
     button.className = "layout-option";
     button.dataset.count = count;
-    button.disabled = Number(count) < 4;
     button.setAttribute("aria-label", `${count} photos per page`);
     const icon = document.createElement("span");
     icon.className = "layout-icon";
@@ -68,7 +83,9 @@ function renderLayouts() {
     icon.style.gridTemplateRows = `repeat(${rows}, 1fr)`;
     for (let i = 0; i < Number(count); i++)
       icon.append(document.createElement("i"));
-    button.append(icon, document.createTextNode(`${count} per page`));
+    const label = document.createElement("span");
+    label.textContent = count;
+    button.append(icon, label);
     button.addEventListener("click", () => {
       state.layout.photosPerPage = Number(count);
       render();
@@ -155,18 +172,25 @@ function render() {
       "aria-pressed",
       String(Number(button.dataset.count) === state.layout.photosPerPage),
     );
-  $("photo-count").textContent = count
-    ? `${count} ${count === 1 ? "photo" : "photos"} selected · up to 30`
-    : "Up to 30 photos · JPEG, PNG & more";
+  $("photo-count").textContent = `${count} / ${MAX_PHOTOS} photos`;
   $("page-count").textContent = count
     ? `${groups.length} ${groups.length === 1 ? "page" : "pages"} · US Letter`
     : "";
   $("ready-label").textContent = count
-    ? `${groups.length} ${groups.length === 1 ? "page" : "pages"} to make your own.`
-    : "Let’s make something.";
+    ? `${count} ${count === 1 ? "photo" : "photos"} ready`
+    : "Add photos to begin";
   $("ready-detail").textContent = count
-    ? `${count} photos · ${state.layout.photosPerPage} per page · Ready when you are.`
-    : "Your next project starts here.";
+    ? `${groups.length} ${groups.length === 1 ? "page" : "pages"} · ${state.layout.photosPerPage} per page`
+    : "Nothing leaves this iPad.";
+  const journey = document.querySelectorAll(".journey li");
+  journey.forEach((step) => step.classList.remove("current", "done"));
+  if (count) {
+    journey[0].classList.add("done");
+    journey[1].classList.add("done");
+    journey[2].classList.add("current");
+  } else {
+    journey[0].classList.add("current");
+  }
   $("empty").hidden = count > 0;
   $("preview-note").hidden = !count;
   $("cut-guides").checked = state.cutGuides;
@@ -219,6 +243,12 @@ async function importPhotos(files) {
   }
   setBusy(true);
   const maxPixels = pixelLimit(state.photos.length + selected.length);
+  const photosToResize = state.photos.filter(
+    (photo) => photo.naturalWidth * photo.naturalHeight > maxPixels,
+  );
+  const preparationTotal = photosToResize.length + selected.length;
+  let completed = 0;
+  updatePreparationProgress(completed, preparationTotal);
   let failed = 0;
   let tooLarge = 0;
   let added = 0;
@@ -232,6 +262,8 @@ async function importPhotos(files) {
         for (const image of $("pages").querySelectorAll("img"))
           if (image.src === oldSrc) image.src = photo.src;
         URL.revokeObjectURL(oldSrc);
+        completed++;
+        updatePreparationProgress(completed, preparationTotal);
       }
     }
     for (const [index, file] of selected.entries()) {
@@ -251,6 +283,9 @@ async function importPhotos(files) {
       } catch (error) {
         failed++;
         if (error.message === "large") tooLarge++;
+      } finally {
+        completed++;
+        updatePreparationProgress(completed, preparationTotal);
       }
     }
     const messages = [];
@@ -478,7 +513,7 @@ $("cancel-reset").addEventListener("click", () => $("reset-dialog").close());
 $("confirm-reset").addEventListener("click", () => {
   for (const photo of state.photos) releasePhoto(photo);
   state.photos = [];
-  state.layout.photosPerPage = 4;
+  state.layout.photosPerPage = 9;
   state.cutGuides = false;
   $("photo-input").value = "";
   $("reset-dialog").close();

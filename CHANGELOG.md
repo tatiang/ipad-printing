@@ -1,3 +1,8 @@
+Sep 16, 2026 — 9:30 PM PT — HEAD — Make photo printing visual and student-ready
+- Show clear current/total progress while photos are prepared on the iPad.
+- Default new sheets to 9-up, restore all five page layouts, and simplify the workflow into large visual actions.
+- Refresh the offline app shell and document a Vercel-hosted `photos.tatian.app` option for school filtering.
+
 Sep 16, 2026 — 2:50 PM PT — HEAD — Simplify COMPASS photo printing for journals
 - Rename the app, emphasize printing only what students need, and remove the requested decorative text.
 - Disable 1- and 2-per-page layouts and keep one Choose Photos button for all imports.
