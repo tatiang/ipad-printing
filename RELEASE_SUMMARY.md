@@ -25,3 +25,7 @@ Rename the app and Home Screen title to COMPASS Photo Printing, emphasize printi
 ## Student-first workflow update
 
 Use larger illustrated controls, a three-step visual path, a 9-up paper preview, and a high-contrast print action so the workflow can be understood with minimal reading. While the app prepares selected images, a blocking progress card now shows the current photo, total count, and determinate completion bar. The app remains dependency-free and keeps all photo processing on the device.
+
+## Production hosting
+
+The static app is deployed to Vercel at `ipad-printing.vercel.app` and connected to the GitHub repository for automatic production updates from `main`. The student-facing `photos.tatian.app` hostname is attached in Vercel and awaits its one-time Cloudflare Domain Connect approval.

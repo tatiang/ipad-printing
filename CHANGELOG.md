@@ -1,3 +1,8 @@
+Sep 16, 2026 — 10:04 PM PT — HEAD — Connect production hosting for the photo printing app
+- Publish the verified static app to Vercel and connect future `main` pushes to production deployments.
+- Attach `photos.tatian.app` and document the remaining Cloudflare DNS approval.
+- Keep local Vercel environment credentials out of Git.
+
 Sep 16, 2026 — 9:30 PM PT — HEAD — Make photo printing visual and student-ready
 - Show clear current/total progress while photos are prepared on the iPad.
 - Default new sheets to 9-up, restore all five page layouts, and simplify the workflow into large visual actions.
