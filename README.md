@@ -16,15 +16,14 @@ Open <http://localhost:8000>. Do not use `file://`: ES modules and service worke
 
 Production project: <https://ipad-printing.vercel.app>
 
-The Vercel project is connected to `tatiang/ipad-printing`; pushes to `main` create production deployments automatically. `photos.tatian.app` is attached to the project and becomes active after Cloudflare applies the required unproxied `photos` CNAME shown by Vercel Domain Connect.
+The Vercel project is connected to `tatiang/ipad-printing`; pushes to `main` create production deployments automatically. The generated `ipad-printing.vercel.app` address is the official student-facing URL and does not include a personal name.
 
 1. Import `tatiang/ipad-printing` into Vercel.
 2. Choose **Other** for the framework, repository root for Root Directory, no Build Command, and `.` for Output Directory. No install command is needed.
 3. Deploy and open the resulting HTTPS URL in Safari.
 4. A Git-connected project can create preview deployments for pull requests once configured in Vercel.
-5. For school use, attach a dedicated custom subdomain such as `photos.tatian.app` in Vercel and allow that exact hostname in the managed web filter. Keep the repository on GitHub as the source; students use only the custom URL.
 
-No `vercel.json`, application environment variables, backend, or database is needed. The app makes no third-party runtime requests, so the custom hostname is the only web origin students need for the app itself. DNS remains managed in Cloudflare outside this repository.
+No `vercel.json`, application environment variables, backend, database, or custom domain is needed. The app makes no third-party runtime requests, so `ipad-printing.vercel.app` is the only web origin students need for the app itself.
 
 ## Student workflow
 

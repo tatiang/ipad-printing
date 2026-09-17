@@ -1,3 +1,7 @@
+Sep 16, 2026 — 10:12 PM PT — HEAD — Use the name-free Vercel address for students
+- Make `ipad-printing.vercel.app` the official classroom URL.
+- Remove the unused `photos.tatian.app` project attachment without changing the existing `tatian.app` site.
+
 Sep 16, 2026 — 10:04 PM PT — HEAD — Connect production hosting for the photo printing app
 - Publish the verified static app to Vercel and connect future `main` pushes to production deployments.
 - Attach `photos.tatian.app` and document the remaining Cloudflare DNS approval.

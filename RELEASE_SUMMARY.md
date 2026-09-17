@@ -16,7 +16,7 @@ Static HTML/CSS and vanilla JavaScript; no runtime dependencies, build step, acc
 
 ## Remaining hardware/deployment checks
 
-Native iPadOS Photos picker, real iPad touch/HEIC variants, Home Screen printing, printer discovery and physical Xerox/AirPrint output require the README checklist. No production deployment or hardware validation is claimed. Deploy as a static site using the README Vercel instructions; hosting is not provisioned by this commit.
+Native iPadOS Photos picker, real iPad touch/HEIC variants, Home Screen printing, printer discovery and physical Xerox/AirPrint output require the README checklist. Production hosting is active on Vercel; physical hardware validation is not yet claimed.
 
 ## COMPASS interface update
 
@@ -28,4 +28,4 @@ Use larger illustrated controls, a three-step visual path, a 9-up paper preview,
 
 ## Production hosting
 
-The static app is deployed to Vercel at `ipad-printing.vercel.app` and connected to the GitHub repository for automatic production updates from `main`. The student-facing `photos.tatian.app` hostname is attached in Vercel and awaits its one-time Cloudflare Domain Connect approval.
+The static app is deployed to Vercel at `ipad-printing.vercel.app` and connected to the GitHub repository for automatic production updates from `main`. This generated Vercel address is the official student-facing URL; no personal custom domain or Cloudflare DNS record is required.
