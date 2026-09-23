@@ -1,0 +1,8 @@
+{
+  "name": "Coffee Time?",
+  "short_name": "Coffee Time?",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#f4efe5",
+  "theme_color": "#f4efe5"
+}
