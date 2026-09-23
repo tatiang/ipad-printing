@@ -1,0 +1,171 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#f4efe5">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="Coffee Time?">
+  <meta name="description" content="Checks whether a class is currently using the Lower Learning Commons.">
+  <link rel="manifest" href="./manifest.webmanifest">
+  <title>Coffee Time?</title>
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <style>
+    :root{--bg:#f5efe5;--paper:#fffdf9;--ink:#25231f;--muted:#756e63;--line:rgba(50,45,38,.12);--green:#e6f4e8;--greenink:#195c37;--purple:#eee9f8;--purpleink:#514074;--neutral:#eeeae3;--shadow:0 18px 55px rgba(65,51,31,.10);font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:var(--ink)}
+    *{box-sizing:border-box}html,body{margin:0;min-height:100%;background:var(--bg)}body{min-height:100vh;background:radial-gradient(circle at top left,#fff9 0,transparent 42%),linear-gradient(#faf6ef,#f2ece1)}
+    main{width:min(720px,100%);margin:auto;padding:max(24px,env(safe-area-inset-top)) 18px max(30px,env(safe-area-inset-bottom))}
+    header{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:16px}.eyebrow,.kicker{margin:0 0 4px;color:var(--muted);font-size:.76rem;font-weight:800;letter-spacing:.09em;text-transform:uppercase}h1{margin:0;font-size:clamp(2rem,9vw,3.2rem);line-height:.95;letter-spacing:-.055em}
+    button,input{font:inherit}.icon{width:44px;height:44px;border:1px solid var(--line);border-radius:50%;background:#ffffffb8;font-size:1.35rem;color:var(--ink);box-shadow:0 6px 20px #41331f0d;cursor:pointer}.icon:disabled{opacity:.4;cursor:default}
+    .hero{position:relative;overflow:hidden;text-align:center;padding:30px 23px 25px;border:1px solid var(--line);border-radius:30px;box-shadow:var(--shadow);background:var(--neutral);color:#625d55;transition:.2s}.hero.available{background:var(--green);color:var(--greenink)}.hero.busy{background:var(--purple);color:var(--purpleink)}.emoji{font-size:clamp(5.5rem,25vw,8.4rem);line-height:1;margin:0 0 10px;filter:drop-shadow(0 8px 14px #0001)}.status{margin:0 0 7px;font-size:.76rem;font-weight:900;letter-spacing:.11em;text-transform:uppercase}.hero h2{margin:0 0 8px;font-size:clamp(1.8rem,8vw,2.7rem);letter-spacing:-.035em;line-height:1.04}.detail{margin:0 auto;max-width:520px;line-height:1.45;opacity:.84}.clock{display:inline-flex;margin-top:17px;padding:7px 12px;border:1px solid #ffffffb8;border-radius:999px;background:#ffffff80;font-size:.82rem;font-weight:750;font-variant-numeric:tabular-nums}
+    .panel{margin-top:14px;padding:18px;border:1px solid var(--line);border-radius:22px;background:#ffffffc7;box-shadow:0 10px 34px #41331f0d;backdrop-filter:blur(10px)}.panel h3{margin:0 0 7px;font-size:1.05rem}.panel p{line-height:1.45}.muted{color:var(--muted)}.primary{width:100%;border:0;border-radius:14px;padding:13px 16px;background:#2d2a25;color:#fff;font-weight:800;cursor:pointer}.primary:disabled{opacity:.5;cursor:default}.setup input{width:100%;padding:12px 13px;margin:8px 0 10px;border:1px solid var(--line);border-radius:12px;background:#fff;color:var(--ink)}.setup code{overflow-wrap:anywhere;background:#0000000d;border-radius:5px;padding:.08em .3em}
+    .rowhead{display:flex;justify-content:space-between;gap:15px;align-items:flex-start}.timebadge{flex:none;padding:6px 10px;border-radius:12px;background:#0000000d;font-weight:800;font-size:.88rem;font-variant-numeric:tabular-nums}.list{display:grid;gap:0;margin-top:12px}.item{display:grid;grid-template-columns:90px 1fr;gap:12px;padding:10px 0;border-top:1px solid var(--line)}.item:first-child{border-top:0}.itime{color:var(--muted);font-size:.85rem;font-weight:750;white-space:pre-line}.ititle{font-weight:700;line-height:1.35}.now::after{content:"Now";display:inline-block;margin-left:7px;padding:2px 6px;border-radius:999px;background:var(--purple);color:var(--purpleink);font-size:.67rem;font-weight:900;text-transform:uppercase}.hidden{display:none!important}
+    footer{display:flex;justify-content:center;gap:7px;flex-wrap:wrap;padding:18px 4px 0;color:var(--muted);font-size:.75rem}.textbtn{border:0;padding:0;background:transparent;color:inherit;text-decoration:underline;text-underline-offset:2px;cursor:pointer}
+    @media(min-width:620px){main{padding-left:26px;padding-right:26px}.authgrid{display:grid;grid-template-columns:1fr auto;gap:18px;align-items:center}.authgrid .primary{width:auto}}
+  </style>
+</head>
+<body>
+<main>
+  <header>
+    <div><p class="eyebrow">Lower Learning Commons</p><h1>Coffee Time?</h1></div>
+    <button id="refresh" class="icon" aria-label="Refresh" disabled>↻</button>
+  </header>
+
+  <section id="hero" class="hero" aria-live="polite">
+    <div id="emoji" class="emoji">…</div>
+    <p id="status" class="status">Status unknown</p>
+    <h2 id="headline">Connect Google Calendar</h2>
+    <p id="detail" class="detail">Connect a Mark Day School Google account to check whether a class is using the room.</p>
+    <div id="clock" class="clock">—</div>
+  </section>
+
+  <section id="setup" class="panel setup hidden">
+    <p class="kicker">One-time setup</p>
+    <h3>Google Calendar connection</h3>
+    <p class="muted">Paste the OAuth <strong>Web Client ID</strong> created for this site. It is saved only on this device.</p>
+    <input id="clientId" inputmode="url" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="123456…apps.googleusercontent.com">
+    <button id="saveClient" class="primary">Save Client ID</button>
+    <p class="muted" style="font-size:.83rem;margin-bottom:0">Authorized JavaScript origin: <code>https://ipad-printing.vercel.app</code></p>
+  </section>
+
+  <section id="auth" class="panel authgrid hidden">
+    <div><h3>Calendar access</h3><p class="muted" style="margin-bottom:0">Read-only access to the Lower Learning Commons calendar. The access token stays in memory.</p></div>
+    <button id="connect" class="primary">Connect Google Calendar</button>
+  </section>
+
+  <section id="next" class="panel hidden">
+    <div class="rowhead"><div><p class="kicker">Next class</p><h3 id="nextTitle">—</h3></div><div id="nextTime" class="timebadge">—</div></div>
+    <p id="nextDetail" class="muted" style="margin-bottom:0">—</p>
+  </section>
+
+  <section id="today" class="panel hidden">
+    <p class="kicker">Today</p><h3>Lower Learning Commons classes</h3>
+    <div id="list" class="list"></div>
+  </section>
+
+  <footer>
+    <span id="updated">Not updated yet</span><span>•</span>
+    <button id="disconnect" class="textbtn hidden">Disconnect</button><span>•</span><span>v1.01</span>
+  </footer>
+</main>
+
+<script>
+(() => {
+  "use strict";
+  const CFG = {
+    VERSION:"1.01",
+    CALENDAR_ID:"markdayschool.org_3938393134353234343033@resource.calendar.google.com",
+    TIME_ZONE:"America/Los_Angeles",
+    SCOPE:"https://www.googleapis.com/auth/calendar.readonly",
+    REFRESH_MS:60000,
+    CLASS_PATTERNS:["learning commons","class"],
+    IGNORE_PATTERNS:["open lc for lunch/recess"]
+  };
+  const $ = id => document.getElementById(id);
+  const el = Object.fromEntries(["hero","emoji","status","headline","detail","clock","setup","clientId","saveClient","auth","connect","refresh","next","nextTitle","nextTime","nextDetail","today","list","updated","disconnect"].map(id=>[id,$(id)]));
+  let tokenClient=null, token=null, timer=null;
+
+  document.addEventListener("DOMContentLoaded", init);
+  function init(){
+    updateClock(); setInterval(updateClock,30000);
+    el.saveClient.onclick=saveClientId; el.connect.onclick=connect; el.refresh.onclick=()=>refresh(true); el.disconnect.onclick=disconnect;
+    document.addEventListener("visibilitychange",()=>{if(!document.hidden&&token)refresh(false)});
+    const saved=localStorage.getItem("coffeeTimeGoogleClientId");
+    if(saved){ el.clientId.value=saved; waitForGIS(saved); } else { el.setup.classList.remove("hidden"); }
+  }
+  function saveClientId(){
+    const id=el.clientId.value.trim();
+    if(!/\.apps\.googleusercontent\.com$/.test(id)){ setUnknown("Client ID doesn't look valid","Paste the complete Google OAuth Web Client ID ending in apps.googleusercontent.com."); return; }
+    localStorage.setItem("coffeeTimeGoogleClientId",id); el.setup.classList.add("hidden"); waitForGIS(id);
+  }
+  function waitForGIS(clientId,n=0){
+    if(window.google?.accounts?.oauth2){
+      tokenClient=google.accounts.oauth2.initTokenClient({client_id:clientId,scope:CFG.SCOPE,callback:onToken,error_callback:onOAuthError});
+      el.auth.classList.remove("hidden"); setUnknown("Ready to connect","Use a Mark Day School Google account with access to the Lower Learning Commons calendar."); return;
+    }
+    if(n>60){setUnknown("Google sign-in unavailable","The Google Identity library did not load. Check the network connection or content filters.");return}
+    setTimeout(()=>waitForGIS(clientId,n+1),100);
+  }
+  function connect(){ if(!tokenClient)return; el.connect.disabled=true; el.connect.textContent="Connecting…"; tokenClient.requestAccessToken({prompt:"consent"}); }
+  function onToken(r){
+    el.connect.disabled=false; el.connect.textContent="Connect Google Calendar";
+    if(!r?.access_token){setUnknown("Calendar access failed","Google did not return an access token.");return}
+    token=r.access_token; el.auth.classList.add("hidden"); el.disconnect.classList.remove("hidden"); el.refresh.disabled=false; refresh(true); startTimer();
+  }
+  function onOAuthError(e){console.error(e);el.connect.disabled=false;el.connect.textContent="Connect Google Calendar";setUnknown("Could not connect","Google sign-in was cancelled or blocked.");}
+  function startTimer(){clearInterval(timer);timer=setInterval(()=>refresh(false),CFG.REFRESH_MS)}
+  function disconnect(){
+    const old=token;token=null;clearInterval(timer);timer=null;
+    if(old&&window.google?.accounts?.oauth2)google.accounts.oauth2.revoke(old,()=>{});
+    el.auth.classList.remove("hidden");el.disconnect.classList.add("hidden");el.refresh.disabled=true;el.next.classList.add("hidden");el.today.classList.add("hidden");el.updated.textContent="Disconnected";
+    setUnknown("Connect Google Calendar","Connect a Mark Day School Google account to check whether a class is using the room.");
+  }
+  async function refresh(manual){
+    if(!token)return;if(manual){el.refresh.disabled=true;el.refresh.textContent="…"}
+    try{render(await fetchEvents())}catch(e){
+      console.error(e);
+      if(e.status===401){token=null;clearInterval(timer);el.auth.classList.remove("hidden");el.disconnect.classList.add("hidden");setUnknown("Session expired","Reconnect Google Calendar to continue.");}
+      else if(e.status===403)setUnknown("Calendar access denied","This Google account does not appear to have permission to read the Lower Learning Commons calendar.");
+      else setUnknown("Schedule unavailable","The calendar could not be checked. Try refresh when the connection is available.");
+    }finally{if(manual){el.refresh.disabled=!token;el.refresh.textContent="↻"}}
+  }
+  async function fetchEvents(){
+    const now=new Date(), q=new URLSearchParams({timeMin:new Date(now-14*3600000).toISOString(),timeMax:new Date(now.getTime()+40*3600000).toISOString(),singleEvents:"true",orderBy:"startTime",timeZone:CFG.TIME_ZONE,maxResults:"100"});
+    const url=`https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(CFG.CALENDAR_ID)}/events?${q}`;
+    const r=await fetch(url,{headers:{Authorization:`Bearer ${token}`}});
+    if(!r.ok){const e=new Error("Calendar request failed");e.status=r.status;throw e}
+    const d=await r.json();
+    return (d.items||[]).filter(x=>x.status!=="cancelled").map(x=>{
+      const s=x.start?.dateTime||x.start?.date,e=x.end?.dateTime||x.end?.date;if(!s||!e)return null;
+      return{id:x.id,title:x.summary||"Untitled event",start:new Date(s),end:new Date(e),isClass:isClass(x.summary||"")};
+    }).filter(Boolean).sort((a,b)=>a.start-b.start);
+  }
+  function isClass(title){const t=title.toLowerCase();if(CFG.IGNORE_PATTERNS.some(p=>t.includes(p)))return false;return CFG.CLASS_PATTERNS.some(p=>t.includes(p))}
+  function render(events){
+    const now=new Date(), classes=events.filter(x=>x.isClass), current=classes.find(x=>x.start<=now&&now<x.end), next=classes.find(x=>x.start>now), todays=classes.filter(x=>sameDay(x.start,now));
+    if(current){const left=duration(current.end-now);setBusy(current.title,`Class is using the Lower Learning Commons until ${time(current.end)}${left?` · ${left} left`:""}.`)}
+    else setAvailable("Coffee time.",next&&sameDay(next.start,now)?`Next class starts at ${time(next.start)}.`:"No class is using the room right now.");
+    renderNext(next,now);renderToday(todays,current);el.updated.textContent=`Updated ${time(now)}`;
+  }
+  function setAvailable(h,d){el.hero.className="hero available";el.emoji.textContent="☕";el.status.textContent="Available";el.headline.textContent=h;el.detail.textContent=d}
+  function setBusy(h,d){el.hero.className="hero busy";el.emoji.textContent="😴";el.status.textContent="Class in session";el.headline.textContent=h;el.detail.textContent=d}
+  function setUnknown(h,d){el.hero.className="hero";el.emoji.textContent="…";el.status.textContent="Status unknown";el.headline.textContent=h;el.detail.textContent=d}
+  function renderNext(n,now){
+    el.next.classList.remove("hidden");
+    if(!n){el.nextTitle.textContent="No upcoming class found";el.nextTime.textContent="—";el.nextDetail.textContent="No class appears in the current calendar window.";return}
+    el.nextTitle.textContent=n.title;el.nextTime.textContent=time(n.start);const date=sameDay(n.start,now)?"Today":day(n.start);const until=duration(n.start-now);el.nextDetail.textContent=`${date}, ${time(n.start)}–${time(n.end)}${until?` · in ${until}`:""}`;
+  }
+  function renderToday(items,current){
+    el.today.classList.remove("hidden");el.list.replaceChildren();
+    if(!items.length){const d=document.createElement("div");d.className="muted";d.textContent="No Lower Learning Commons classes are scheduled today.";el.list.append(d);return}
+    items.forEach(x=>{const row=document.createElement("div");row.className="item";const t=document.createElement("div");t.className="itime";t.textContent=`${time(x.start)}\n${time(x.end)}`;const title=document.createElement("div");title.className="ititle"+(current?.id===x.id?" now":"");title.textContent=x.title;row.append(t,title);el.list.append(row)})
+  }
+  function updateClock(){const n=new Date();el.clock.textContent=`${day(n,{weekday:"long"})} · ${time(n)} PT`}
+  function sameDay(a,b){const f=new Intl.DateTimeFormat("en-CA",{timeZone:CFG.TIME_ZONE,year:"numeric",month:"2-digit",day:"2-digit"});return f.format(a)===f.format(b)}
+  function time(d){return new Intl.DateTimeFormat("en-US",{timeZone:CFG.TIME_ZONE,hour:"numeric",minute:"2-digit"}).format(d)}
+  function day(d,o={}){return new Intl.DateTimeFormat("en-US",{timeZone:CFG.TIME_ZONE,weekday:o.weekday||"short",month:"short",day:"numeric"}).format(d)}
+  function duration(ms){if(ms<=0)return"";const m=Math.max(1,Math.round(ms/60000)),h=Math.floor(m/60),r=m%60;return h?(r?`${h} hr ${r} min`:`${h} hr`):`${m} min`}
+})();
+</script>
+</body>
+</html>
