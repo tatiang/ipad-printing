@@ -1,4 +1,4 @@
-export const VERSION = "v1.01";
+export const VERSION = "v1.02";
 export const LAYOUTS = {
   1: [1, 1],
   2: [1, 2],
@@ -65,5 +65,29 @@ export function movePhoto(photos, id, direction) {
   const target = index + direction;
   if (index < 0 || target < 0 || target >= photos.length) return false;
   [photos[index], photos[target]] = [photos[target], photos[index]];
+  return true;
+}
+
+// Quantities repeat references, not image buffers. Editing an original updates every copy.
+export const MAX_COPIES_PER_PHOTO = 30;
+export const MAX_PRINTED_PHOTOS = 90;
+export const copyCount = (photo) =>
+  clamp(Math.trunc(Number(photo.copies) || 1), 1, MAX_COPIES_PER_PHOTO);
+export const totalCopies = (photos) =>
+  photos.reduce((sum, photo) => sum + copyCount(photo), 0);
+export const expandCopies = (photos) =>
+  photos.flatMap((photo) => Array(copyCount(photo)).fill(photo));
+
+export function changePhotoCopies(photos, id, delta) {
+  const photo = photos.find((item) => item.id === id);
+  if (!photo || ![-1, 1].includes(delta)) return false;
+  const next = copyCount(photo) + delta;
+  if (
+    next < 1 ||
+    next > MAX_COPIES_PER_PHOTO ||
+    totalCopies(photos) + delta > MAX_PRINTED_PHOTOS
+  )
+    return false;
+  photo.copies = next;
   return true;
 }

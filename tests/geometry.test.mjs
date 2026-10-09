@@ -109,3 +109,56 @@ test("landscape is available to the geometry layer without changing v1 UI", () =
   assert.equal(g.width, 11);
   assert.equal(g.height, 8.5);
 });
+
+test("copies stay together in reading order and reuse the original image", async () => {
+  const { expandCopies, totalCopies } = await import("../geometry_v1.00.mjs");
+  const a = { id: "a", copies: 3, src: "blob:a", rotation: 0 };
+  const b = { id: "b", copies: 2, src: "blob:b", rotation: 0 };
+  const expanded = expandCopies([a, b]);
+  assert.equal(totalCopies([a, b]), 5);
+  assert.deepEqual(
+    expanded.map((photo) => photo.id),
+    ["a", "a", "a", "b", "b"],
+  );
+  assert.equal(paginate(expanded, 4).length, 2);
+  assert.equal(expanded[0], expanded[2]);
+  a.rotation = 90;
+  assert.equal(expanded[2].rotation, 90);
+});
+
+test("copy limits enforce one minimum, thirty per photo and ninety total", async () => {
+  const { changePhotoCopies, totalCopies } =
+    await import("../geometry_v1.00.mjs");
+  const photos = [
+    { id: "a", copies: 1 },
+    { id: "b", copies: 30 },
+    { id: "c", copies: 30 },
+    { id: "d", copies: 29 },
+  ];
+  assert.equal(changePhotoCopies(photos, "a", -1), false);
+  assert.equal(changePhotoCopies(photos, "a", 1), false);
+  assert.equal(changePhotoCopies(photos, "b", 1), false);
+  assert.equal(changePhotoCopies(photos, "missing", 1), false);
+  assert.equal(changePhotoCopies(photos, "a", 2), false);
+  assert.equal(changePhotoCopies(photos, "d", -1), true);
+  assert.equal(changePhotoCopies(photos, "a", 1), true);
+  assert.equal(totalCopies(photos), 90);
+});
+
+test("reordering and removal act on an entire group of copies", async () => {
+  const { expandCopies } = await import("../geometry_v1.00.mjs");
+  const photos = [
+    { id: "a", copies: 2 },
+    { id: "b", copies: 3 },
+  ];
+  movePhoto(photos, "a", 1);
+  assert.deepEqual(
+    expandCopies(photos).map((photo) => photo.id),
+    ["b", "b", "b", "a", "a"],
+  );
+  photos.splice(0, 1);
+  assert.deepEqual(
+    expandCopies(photos).map((photo) => photo.id),
+    ["a", "a"],
+  );
+});

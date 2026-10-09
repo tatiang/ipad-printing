@@ -67,7 +67,7 @@ async function verifyOfflineShell(browser) {
     server.closeAllConnections();
     await new Promise((resolve) => server.close(resolve));
     await page.reload();
-    await page.locator(".layout-option").first().waitFor();
+    await page.locator(".layout-option").first().waitFor({ state: "attached" });
     assert.equal(await page.locator("#empty").isVisible(), true);
     assert.equal(await page.locator(".layout-option").count(), 5);
     assert.deepEqual(errors, []);
@@ -115,7 +115,7 @@ for (const [engine, browserType] of [
         external.push(request.url());
     });
     await page.goto(base);
-    await page.locator(".layout-option").first().waitFor();
+    await page.locator(".layout-option").first().waitFor({ state: "attached" });
     assert.equal(await page.locator(".layout-option").count(), 5);
     assert.equal(await page.locator("#print").isDisabled(), true);
     assert.equal(
@@ -127,6 +127,40 @@ for (const [engine, browserType] of [
       path: `test-results/${engine}-empty.png`,
       fullPage: true,
     });
+    assert.equal(await page.locator("#workspace").isHidden(), true);
+    assert.equal(await page.locator("#print-bar").isHidden(), true);
+    assert.match(
+      await page.locator("h1").textContent(),
+      /First, choose your photos/,
+    );
+    assert.equal(await page.locator("button:visible").count(), 1);
+    for (const viewport of [
+      { width: 768, height: 1024 },
+      { width: 1024, height: 768 },
+      { width: 390, height: 844 },
+    ]) {
+      await page.setViewportSize(viewport);
+      const choose = await page.locator("#choose").boundingBox();
+      assert.ok(
+        choose.height >= 80 && choose.y + choose.height <= viewport.height,
+        "large Choose Photos is visible without scrolling",
+      );
+      assert.equal(
+        await page.evaluate(
+          () => document.documentElement.scrollWidth <= innerWidth,
+        ),
+        true,
+      );
+      await page.screenshot({
+        path: `test-results/${engine}-start-${viewport.width}.png`,
+        fullPage: true,
+      });
+    }
+    await page.setViewportSize({ width: 1024, height: 1366 });
+    const chooserPromise = page.waitForEvent("filechooser");
+    await page.locator("#choose").click();
+    await (await chooserPromise).setFiles([]);
+    assert.equal(await page.locator("#empty").isVisible(), true);
     const makeFile = async (width, height, color, name) => ({
       name,
       mimeType: "image/png",
@@ -164,7 +198,9 @@ for (const [engine, browserType] of [
       if (observeProgress) {
         await page.locator("#preparing").waitFor({ state: "visible" });
         assert.equal(
-          await page.locator("#preparing-progress").getAttribute("aria-valuemax"),
+          await page
+            .locator("#preparing-progress")
+            .getAttribute("aria-valuemax"),
           String(list.length),
         );
         assert.match(
@@ -282,6 +318,157 @@ for (const [engine, browserType] of [
       }
       await page.emulateMedia({ media: "screen" });
     };
+    // Two originals become six composed photos without allocating additional Blob URLs.
+    await importFiles([portrait, landscape]);
+    assert.equal(await page.locator("#photo-copies .copy-row").count(), 2);
+    assert.equal(
+      await page
+        .getByRole("button", { name: "Add More Photos", exact: true })
+        .count(),
+      1,
+    );
+    const firstCopyId = await page
+      .locator("#pages .photo-frame")
+      .first()
+      .getAttribute("data-photo-id");
+    const secondCopyId = await page
+      .locator("#pages .photo-frame")
+      .nth(1)
+      .getAttribute("data-photo-id");
+    const copiesPlus = page.getByRole("button", {
+      name: "Increase copies of photo 1",
+      exact: true,
+    });
+    for (let i = 0; i < 3; i++) await copiesPlus.click();
+    assert.equal(
+      await page.getByLabel("Copies of photo 1", { exact: true }).textContent(),
+      "4",
+    );
+    assert.equal(await page.locator("#pages img").count(), 5);
+    assert.equal(await page.evaluate(() => window.testURLs.size), 2);
+    assert.equal(
+      await page.evaluate(() =>
+        document.activeElement.getAttribute("aria-label"),
+      ),
+      "Increase copies of photo 1",
+    );
+    await page.locator('[data-count="4"]').click();
+    await verifyPrint(2);
+    await page.locator("#pages .photo-frame").nth(2).click();
+    await page.locator("#rotate").click();
+    await page.locator("#zoom").fill("2");
+    await page.locator("#zoom").dispatchEvent("input");
+    await page.locator("#copies-more").click();
+    assert.equal(await page.locator("#editor-copy-count").textContent(), "5");
+    const cropStyle = await page
+      .locator("#edit-frame img")
+      .getAttribute("style");
+    const copyStyles = await page
+      .locator(`[data-photo-id="${firstCopyId}"] img`)
+      .evaluateAll((images) => images.map((img) => img.getAttribute("style")));
+    assert.equal(copyStyles.length, 5);
+    assert.ok(copyStyles.every((style) => style === cropStyle));
+    assert.equal(await page.evaluate(() => window.testURLs.size), 2);
+    await page.locator("#later").click();
+    assert.deepEqual(
+      await page
+        .locator("#pages .photo-frame")
+        .evaluateAll((frames) => frames.map((frame) => frame.dataset.photoId)),
+      [secondCopyId, ...Array(5).fill(firstCopyId)],
+    );
+    await page.locator("#done").click();
+    await page.waitForFunction(
+      () => !document.getElementById("print").disabled,
+    );
+    await page.screenshot({
+      path: `test-results/${engine}-teammate-copies.png`,
+      fullPage: true,
+    });
+    await verifyPrint(2);
+    // Decreasing returns exactly one print slot; removing the original releases all remaining copies.
+    await page
+      .getByRole("button", { name: "Decrease copies of photo 2", exact: true })
+      .click();
+    assert.equal(await page.locator("#pages img").count(), 5);
+    await page.locator("#pages .photo-frame").nth(1).click();
+    await page.locator("#remove").click();
+    await page.waitForFunction(
+      () => document.querySelectorAll("#pages img").length === 1,
+    );
+    assert.equal(await page.evaluate(() => window.testURLs.size), 1);
+    await reset();
+    // Per-photo and combined limits remain accessible and release no URLs on quantity changes.
+    await importFiles([portrait, landscape, portrait, landscape]);
+    for (const [photo, extra] of [
+      [1, 29],
+      [2, 29],
+      [3, 28],
+    ]) {
+      for (let i = 0; i < extra; i++)
+        await page
+          .getByRole("button", {
+            name: `Increase copies of photo ${photo}`,
+            exact: true,
+          })
+          .click();
+    }
+    assert.equal(await page.locator("#pages img").count(), 90);
+    assert.equal(
+      await page
+        .locator("#photo-copies button[data-delta='1']:enabled")
+        .count(),
+      0,
+    );
+    assert.equal(await page.locator("#copies-limit").isVisible(), true);
+    assert.equal(await page.evaluate(() => window.testURLs.size), 4);
+    await importFiles([portrait]);
+    assert.match(
+      await page.locator("#status").textContent(),
+      /90 photos to print/,
+    );
+    await page
+      .getByRole("button", { name: "Decrease copies of photo 3", exact: true })
+      .click();
+    assert.equal(
+      await page
+        .getByRole("button", {
+          name: "Increase copies of photo 1",
+          exact: true,
+        })
+        .isDisabled(),
+      true,
+    );
+    assert.equal(
+      await page
+        .getByRole("button", {
+          name: "Increase copies of photo 3",
+          exact: true,
+        })
+        .isEnabled(),
+      true,
+    );
+    await importFiles([portrait]);
+    assert.equal(await page.locator("#pages img").count(), 90);
+    assert.equal(await page.locator("#photo-copies .copy-row").count(), 5);
+    await reset();
+    await importFiles([portrait]);
+    assert.equal(
+      await page.getByLabel("Copies of photo 1", { exact: true }).textContent(),
+      "1",
+    );
+    assert.equal(
+      await page
+        .getByRole("button", {
+          name: "Decrease copies of photo 1",
+          exact: true,
+        })
+        .isDisabled(),
+      true,
+    );
+    await reset();
+    console.log(
+      `${engine}: choose-first onboarding, native picker, teammate copies, shared crop, limits, print pagination and URL lifetime passed`,
+    );
     for (const [count, perPage, expected] of [
       [1, 1, 1],
       [2, 2, 1],
@@ -304,8 +491,8 @@ for (const [engine, browserType] of [
     console.log(
       `${engine}: all layout/page-count cases, progress UI and print media passed`,
     );
-    await page.locator('[data-count="4"]').click();
     await importFiles(files.slice(0, 10));
+    await page.locator('[data-count="4"]').click();
     const firstId = await page
       .locator(".photo-frame")
       .first()
@@ -415,8 +602,7 @@ for (const [engine, browserType] of [
       () => document.querySelectorAll("#pages img").length === 9,
     );
     assert.equal(await page.evaluate(() => window.testURLs.size), 9);
-    await page.locator("#cut-guides").check();
-    assert.ok((await page.locator(".cut-guide").count()) > 0);
+    assert.equal(await page.locator("#cut-guides, .cut-guide").count(), 0);
     await page.screenshot({
       path: `test-results/${engine}-sheets.png`,
       fullPage: true,
@@ -451,7 +637,7 @@ for (const [engine, browserType] of [
       await page.locator('[data-count="9"]').getAttribute("aria-pressed"),
       "true",
     );
-    assert.equal(await page.locator("#cut-guides").isChecked(), false);
+    assert.equal(await page.locator("#cut-guides, .cut-guide").count(), 0);
     await importFiles([
       {
         name: "broken.jpg",

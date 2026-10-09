@@ -1,4 +1,4 @@
-# COMPASS Photo Printing — v1.01
+# COMPASS Photo Printing — v1.02
 
 A private, static photo-sheet maker for K–8 students using iPad Safari. Choose photos, pick **1, 2, 4, 6, or 9 per page**, tap a photo to adjust it, and print through the normal iPadOS/AirPrint interface. No accounts, uploads, database, runtime dependencies, or build step.
 
@@ -27,18 +27,20 @@ No `vercel.json`, application environment variables, backend, database, or custo
 
 ## Student workflow
 
-1. **Choose Photos** → Photo Library → select multiple photos → Add. Use this same button to add more photos later.
-2. Select a **photos per page** button. Nine per page is the default.
-3. Tap any photo. Drag to pan, pinch or use buttons/slider to zoom, and tap **Rotate** for 90° clockwise steps. Edits save immediately; **Done** or Escape closes the editor.
-4. Use **Earlier / Later** to reorder, **Remove photo** to delete from this sheet, or **Reset crop** to undo that photo’s adjustments.
-5. Optionally turn on **Cut guides**. Tap **Print**, choose the AirPrint printer and US Letter portrait paper, check the page count, then print.
-6. **Start Over** asks before clearing the session. It never deletes originals from Photos.
+1. The first screen shows **First, choose your photos** and one large green **Choose Photos** button. Tap it → Photo Library → select photos → Add. Layout and Print controls appear only after photos are chosen.
+2. Under **Copies for teammates**, tap **+** or **−** beside each photo. The number is the total to print, including your own copy. For four teammates including you, set it to **4**. New photos start at one copy.
+3. Choose **photos per page**. Nine per page remains the default; all five layouts are available. The preview immediately includes every copy and shows the resulting page count.
+4. Tap a photo to rotate, zoom or crop. All copies of that photo share those edits. Copy controls also appear in the editor. **Earlier / Later** moves the photo and all its copies together; **Remove photo** removes the whole group.
+5. Tap **Print**, select the AirPrint printer and US Letter portrait paper, and check the preview. Leave the native print dialog's job copies at **1**: the app already arranged the requested individual photo copies. Cut guides are no longer part of the app.
+6. The same picker button becomes **Add More Photos** after import. **Clear all** asks before clearing the session and returns to the choose-photos-first screen. It never deletes originals from Photos.
+
+Copy quantities range from 1–30 for each original, with at most 90 printed photos per job. Up to 30 original photos can be selected. At the combined limit, decrease a copy count to make room for another photo. To remove a photo entirely, use its editor's Remove action.
 
 ## Architecture and directory tree
 
 ```text
 .
-├── .agent/execplans/photo-sheet-v1.md   Implementation plan and verification record
+├── .agent/execplans/                  Implementation plans and verification records
 ├── .gitignore
 ├── CHANGELOG.md
 ├── RELEASE_SUMMARY.md
@@ -61,7 +63,7 @@ No `vercel.json`, application environment variables, backend, database, or custo
 
 **HTML/CSS rather than page canvases:** the editor, preview, and print document use the same image and transform. Each sheet uses a single geometry definition in inches, projected into percentage positions for a responsive screen preview. Printing gives the exact same DOM a physical 8.5 × 11-inch size. This avoids large full-page raster buffers, preserves browser image rendering, and prevents separate preview/print crop implementations from drifting apart.
 
-Each photo has a stable UUID, original in-memory `File`, working Blob URL, oriented dimensions, quarter-turn rotation, zoom (1–4×), and normalized x/y travel offsets. Layout state is separate. Images cover their frames without stretching; crop bounds account for 90°/270° dimension swaps. Changing layout keeps edits bounded. Rotation recenters the crop for predictable student use. Crop edits are nondestructive; normalization does not crop the original file.
+Each photo has a stable UUID, original in-memory `File`, working Blob URL, oriented dimensions, quarter-turn rotation, zoom (1–4×), normalized x/y travel offsets, and a copies count. Layout state is separate. Page generation expands references to each photo according to its quantity; copies share the same Blob URL and crop state, so increasing quantities does not decode or allocate additional working images. Removing/resetting releases each original URL once. Images cover their frames without stretching; crop bounds account for 90°/270° dimension swaps. Changing layout keeps edits bounded. Rotation recenters the crop for predictable student use. Crop edits are nondestructive; normalization does not crop the original file.
 
 **Canvas is used only during sequential import**, to bake EXIF orientation into a bounded working JPEG. It is never used to rasterize whole pages. Each image is limited to a 2400-pixel long edge and initially 4 megapixels, with a 48-megapixel combined working-image budget divided across the requested count. When adding photos, existing images are re-prepared from their original files at the new budget, avoiding repeated lossy resampling. At typical small counts this provides about 200–300 DPI for an unzoomed full-page photograph and more in smaller cells. Large batches, unusual aspect ratios, low-resolution sources and deep zoom reduce effective DPI. Images are never enlarged during normalization. JPEG quality is 0.95; transparency is flattened onto white and animated inputs become stills. Removing photos does not increase the remaining working resolution until reimport.
 
@@ -74,7 +76,6 @@ A maximum of 30 photos, 40 MiB per source file, and 64 megapixels per decoded so
 - Frame positions reserve **0.25-inch outer margins** and **0.15-inch gaps**.
 - Each wrapper forces a page break except the last. Empty slots have no DOM image, so they print white.
 - Navigation, controls, dialogs, status, page labels and photo badges use print hiding rules. Only composed sheets print.
-- Cut guides use subtle dashed borders centered in the gaps, never over photos.
 - A blocking, determinate progress card shows current/total preparation while files are decoded sequentially. Print remains disabled until all working preview images are decoded. The click calls `window.print()` synchronously, preserving the browser’s user gesture.
 - Crops are percentage-based and use identical frame proportions in preview/editor/print, independent of viewport dimensions.
 
@@ -88,7 +89,7 @@ Browsers and printer settings ultimately control paper size, scaling, headers/fo
 - Pointer Events with pointer capture implement pan/pinch. `touch-action: none` applies only inside the editor crop frame. Browser zoom and normal scrolling elsewhere stay enabled. A pointer ending/cancelling resets the gesture baseline. Buttons and arrow keys are available without gestures.
 - Native `<dialog>` provides focus trapping; Done/Escape closes it and restores focus. Photo buttons, layout selection, crop controls, and reordering are keyboard-accessible.
 - CSS print sizing and transformed/clipped images need a physical Safari/AirPrint check. Desktop WebKit automation is useful but cannot certify the native iPadOS print sheet or a Xerox printer. [MDN printing guidance](https://developer.mozilla.org/en-US/docs/Web/CSS/Guides/Media_queries/Printing) describes the browser print hooks used here.
-- The app calls the standard print interface only. It cannot discover/configure printers, choose copies, bypass printer selection, verify printed output, or guarantee a printer is reachable. The iPad and printer must have compatible network access and school AirPrint policies.
+- The app calls the standard print interface only. It cannot discover/configure printers, choose native print-job copies, bypass printer selection, verify printed output, or guarantee a printer is reachable. The iPad and printer must have compatible network access and school AirPrint policies.
 - Standalone Home Screen behavior varies by iPadOS/policy. If the Print button does not open the sheet in standalone mode, reopen the site in Safari and reselect photos. Session photos do not transfer between browser windows.
 - Chrome and Edge are secondary targets; JPEG and PNG are the portable inputs. No browser-specific Xerox integration exists.
 
@@ -123,12 +124,12 @@ npm install --prefix /tmp/photo-sheet-qa --no-save playwright@1.63.0
 PLAYWRIGHT_MODULE=/tmp/photo-sheet-qa/node_modules/playwright/index.mjs node tests/browser.mjs
 ```
 
-The offline check stops an isolated test server, rather than relying on WebKit’s offline simulator (which returned an internal navigation error in this environment). The runner writes screenshots and PDFs to ignored `test-results/`. It covers all requested layouts and counts, rotation/crop, pan/pinch events, order/delete/reset, unsupported imports, Letter dimensions and PDF pagination, hidden print controls, narrow/landscape viewports, URL cleanup and offline shell caching. Real iPad touch and actual printed output remain separate acceptance checks.
+The offline check stops an isolated test server, rather than relying on WebKit’s offline simulator (which returned an internal navigation error in this environment). The runner writes screenshots and PDFs to ignored `test-results/`. It covers all requested layouts and counts, rotation/crop, pan/pinch events, order/delete/reset, unsupported imports, per-photo/combined copy limits, shared crop edits, copy pagination, Letter dimensions and PDF pagination, hidden print controls, narrow/landscape viewports, URL cleanup and offline shell caching. Real iPad touch and actual printed output remain separate acceptance checks.
 
 ## iPad QA checklist (required before classroom rollout)
 
 - [ ] Open the HTTPS site in current Safari on the school-managed iPad.
-- [ ] Choose Photos opens the native picker; cancelling changes nothing; select multiple files.
+- [ ] Before import, only the large Choose Photos button is actionable; later layout and print controls are hidden. The button is visible without scrolling in both iPad orientations. Choose Photos opens the native picker; cancelling changes nothing; select multiple files.
 - [ ] Import portrait camera JPEG and HEIC/HEIF; confirm correct EXIF orientation. Test a PNG and a rejected/broken file.
 - [ ] Confirm 9-per-page is selected on a fresh sheet. Test 1, 2, 4, 6, and 9-per-page layouts.
 - [ ] Import 14 photos, select 9: **2 pages**, last page has five photos. Import 10, select 4: **3 pages**, last page has two.
@@ -136,14 +137,14 @@ The offline check stops an isolated test server, rather than relying on WebKit�
 - [ ] Check zoom buttons/slider, four move buttons, Reset crop, Done, keyboard focus, Escape and VoiceOver labels.
 - [ ] Move a middle photo earlier/later across a page boundary; remove a middle photo. The remaining order is correct.
 - [ ] Check portrait and landscape iPad orientation, long pages and browser zoom; preview keeps Letter proportions.
-- [ ] Enable cut guides; confirm they occupy only gaps. Disable them and confirm they disappear.
+- [ ] Choose two photos; set one to 4 copies and the other to 2. Select 4 per page: expect 6 printed photos on 2 pages. Crop/rotate one copy; every copy of that original updates. Decrease quantities, reorder and remove a photo; its entire copy group follows. Confirm there are no cut-guide controls or lines.
 - [ ] Tap Print; native iPad print UI opens, AirPrint printer (including Xerox VersaLink C620) appears.
 - [ ] Select Letter portrait. Print an edited multi-page sheet: one physical sheet per preview page, no controls/page labels, matching rotation/crop/spacing, and unclipped margins.
 - [ ] Repeat with a Home Screen launch. Use the Safari fallback if standalone printing is unavailable.
 - [ ] After initial online load, open the installed app offline; shell loads. Confirm no selected photos survive a fresh reload.
-- [ ] Start Over → Keep my sheet preserves photos. Confirm Start Over clears photos, crops, guides and returns to 4-per-page. Remove the last photo and confirm the empty state.
+- [ ] Clear all → Keep my sheet preserves photos. Confirm clearing resets photos, crops and copy quantities and returns to 9-per-page. Remove the last photo and confirm the empty state.
 - [ ] Try a typical 15-photo batch and a 30-photo batch on the oldest supported school iPad; verify memory stability and acceptable print detail.
 
 ## Known limitations / release status
 
-v1.01 is portrait Letter only, with no cloud drafts or photo recovery after refresh. Very large files, unsupported codecs and excessive batches are rejected politely. Working-image normalization trades some source resolution for iPad memory safety. Browser/OS printing can override CSS preferences. Physical iPad/AirPrint QA is required before calling the deployment classroom-validated; software tests alone do not prove hardware acceptance.
+v1.02 is portrait Letter only, with no cloud drafts or photo recovery after refresh. Very large files, unsupported codecs and excessive batches are rejected politely. Working-image normalization trades some source resolution for iPad memory safety. Browser/OS printing can override CSS preferences. Physical iPad/AirPrint QA is required before calling the deployment classroom-validated; software tests alone do not prove hardware acceptance.
