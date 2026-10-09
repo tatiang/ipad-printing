@@ -1,9 +1,5 @@
 :root {
-  font-family:
-    "Avenir Next",
-    Avenir,
-    "Trebuchet MS",
-    sans-serif;
+  font-family: "Avenir Next", Avenir, "Trebuchet MS", sans-serif;
   color: #17372f;
   background: #f4f0e6;
   font-synthesis: none;
@@ -23,8 +19,7 @@ body {
   min-height: 100vh;
   background:
     linear-gradient(90deg, #17372f08 1px, transparent 1px),
-    linear-gradient(#17372f08 1px, transparent 1px),
-    #f4f0e6;
+    linear-gradient(#17372f08 1px, transparent 1px), #f4f0e6;
   background-size: 24px 24px;
 }
 button,
@@ -340,21 +335,7 @@ main {
   opacity: 0.65;
   border-radius: 1px;
 }
-.toggle {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  min-height: 44px;
-  margin-top: 12px;
-  font-size: 13px;
-  font-weight: 700;
-  cursor: pointer;
-}
-.toggle input {
-  accent-color: var(--accent);
-  width: 18px;
-  height: 18px;
-}
+
 .adjust-cue {
   background: #f9d44a;
   border: 2px solid var(--ink);
@@ -569,13 +550,7 @@ main {
   border-radius: 5px;
   pointer-events: none;
 }
-.cut-guide {
-  position: absolute;
-  pointer-events: none;
-  border: 0;
-  border-color: #a1a1a1;
-  border-style: dashed;
-}
+
 .preview-note {
   text-align: center;
   font-size: 11px;
@@ -950,9 +925,7 @@ dialog::backdrop {
   .layout-option {
     font-size: 10px;
   }
-  .toggle {
-    margin-bottom: -10px;
-  }
+
   .preview-area {
     min-height: 520px;
     padding: 18px;
@@ -1051,6 +1024,230 @@ dialog::backdrop {
     padding-top: 8px;
   }
 }
+/* The first screen has one action; editing and printing appear only after import. */
+body:not(.has-photos) .intro {
+  flex-direction: column;
+  align-items: center;
+  gap: 24px;
+  text-align: center;
+}
+.intro {
+  gap: 24px;
+}
+.intro h1 {
+  font-size: clamp(2rem, 4vw, 3.4rem);
+  line-height: 1.08;
+}
+.photo-picker {
+  max-width: 840px;
+  margin: 0 auto 28px;
+  padding: 36px;
+  border: 2px solid var(--ink);
+  border-radius: 20px;
+  background: var(--paper);
+  box-shadow: 7px 7px 0 #17372f1a;
+  text-align: center;
+}
+.photo-picker h2 {
+  font-size: 23px;
+  margin-bottom: 8px;
+}
+.photo-picker p {
+  margin-bottom: 20px;
+}
+#choose {
+  width: min(100%, 440px);
+  min-height: 92px;
+  font-size: 28px;
+  font-weight: 800;
+  gap: 14px;
+}
+#choose > span:first-child {
+  font-size: 36px;
+}
+.start-help {
+  margin-top: 25px;
+}
+.start-help p {
+  margin: 8px 0;
+}
+.start-help strong {
+  color: var(--ink);
+}
+.photo-picker .photo-count {
+  margin: 20px auto 0;
+  max-width: 100%;
+  width: fit-content;
+}
+.has-photos .photo-picker {
+  max-width: none;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 8px 24px;
+  padding: 18px 24px;
+  text-align: left;
+}
+.has-photos .photo-picker h2 {
+  font-size: 18px;
+}
+.has-photos .photo-picker p {
+  margin-bottom: 0;
+  font-size: 13px;
+}
+.has-photos #choose {
+  min-height: 56px;
+  font-size: 18px;
+  width: auto;
+}
+.has-photos #choose > span:first-child {
+  font-size: 24px;
+}
+.has-photos .photo-picker .photo-count {
+  margin: 0;
+  grid-column: 1 / -1;
+}
+.controls {
+  position: static;
+}
+.photo-copies {
+  max-height: 350px;
+  overflow-y: auto;
+  scroll-padding: 8px;
+  padding: 4px;
+  margin: 0 -4px;
+}
+.copy-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 0;
+  border-bottom: 1px solid var(--line);
+}
+.copy-row:last-child {
+  border-bottom: 0;
+}
+.copy-thumbnail {
+  width: 36px;
+  height: 44px;
+  object-fit: cover;
+  border-radius: 4px;
+  flex-shrink: 0;
+}
+.copy-name {
+  flex: 1;
+  min-width: 0;
+  font-size: 12px;
+}
+.copy-name small {
+  display: block;
+  font-size: 11px;
+  color: var(--muted);
+  margin-top: 3px;
+}
+.copy-stepper {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+}
+.copy-stepper .button {
+  width: 44px;
+  min-height: 44px;
+  padding: 5px;
+  font-size: 23px;
+}
+.copy-stepper output {
+  min-width: 26px;
+  text-align: center;
+  font-size: 18px;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+.control-section .copies-note {
+  font-size: 12px;
+  margin: 12px 0 0;
+}
+.copies-limit {
+  color: #873713;
+  background: #fff0dd;
+  padding: 10px;
+  border-radius: 8px;
+}
+.editor-copies {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  background: #e6f1eb;
+  border-radius: 10px;
+  padding: 12px;
+  margin-top: 16px;
+}
+.editor-copies strong {
+  font-size: 14px;
+}
+.editor-copies small {
+  display: block;
+  font-size: 12px;
+  margin-top: 3px;
+}
+.editor-copy-status {
+  font-size: 12px;
+  margin: 8px 0;
+}
+.editor-copy-status:empty {
+  display: none;
+}
+@media (max-width: 760px) {
+  .intro {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 18px;
+  }
+  .intro .eyebrow {
+    display: block;
+  }
+  .journey {
+    gap: 22px;
+  }
+  .journey span {
+    display: block;
+    font-size: 9px;
+  }
+  .photo-picker {
+    padding: 24px 18px;
+  }
+  .photo-picker h2 {
+    font-size: 20px;
+  }
+  #choose {
+    min-height: 84px;
+    font-size: 25px;
+  }
+  .has-photos .photo-picker {
+    grid-template-columns: 1fr;
+    padding: 18px;
+    gap: 12px;
+  }
+  .has-photos #choose {
+    width: 100%;
+  }
+  .copy-row {
+    gap: 12px;
+  }
+  .editor-copies {
+    gap: 6px;
+    padding: 10px;
+  }
+  .editor-copies strong {
+    font-size: 12px;
+  }
+  .editor-copies small {
+    font-size: 11px;
+  }
+}
+
 @page {
   size: letter portrait;
   margin: 0;
@@ -1118,8 +1315,5 @@ dialog::backdrop {
   }
   .photo-frame img {
     visibility: visible;
-  }
-  .cut-guide {
-    border-color: #888;
   }
 }

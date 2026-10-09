@@ -10,7 +10,7 @@
     />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-title" content="COMPASS Photo Printing" />
-    <title>COMPASS Photo Printing · v1.01</title>
+    <title>COMPASS Photo Printing · v1.02</title>
     <link rel="icon" href="icons/icon.svg" type="image/svg+xml" />
     <link rel="apple-touch-icon" href="icons/icon-192.png" />
     <link rel="manifest" href="manifest.webmanifest" />
@@ -22,7 +22,8 @@
       <a class="brand" href="./" aria-label="COMPASS Photo Printing home"
         ><span class="brand-mark" aria-hidden="true">▧</span
         ><span
-          >COMPASS Photo Printing<span class="brand-sub">THE CREATIVITY LAB</span
+          >COMPASS Photo Printing<span class="brand-sub"
+            >THE CREATIVITY LAB</span
           ></span
         ></a
       >
@@ -30,47 +31,83 @@
     <main>
       <section class="intro screen-only">
         <div>
-          <p class="eyebrow">CREATIVITY LAB TOOL</p>
-          <h1>Photos <span aria-hidden="true">→</span> paper.</h1>
+          <p class="eyebrow" id="intro-kicker">START HERE · STEP 1</p>
+          <h1 id="intro-title">First, choose your photos.</h1>
         </div>
-        <ol class="journey" aria-label="Three steps: add photos, choose a layout, then print">
-          <li class="current"><b aria-hidden="true">＋</b><span>Add</span></li>
-          <li><b aria-hidden="true">▦</b><span>Layout</span></li>
-          <li><b aria-hidden="true">↗</b><span>Print</span></li>
+        <ol
+          class="journey"
+          aria-label="Choose photos, set copies, choose a layout, then print"
+        >
+          <li class="current"><b>1</b><span>Photos</span></li>
+          <li><b>2</b><span>Copies</span></li>
+          <li><b>3</b><span>Layout</span></li>
+          <li><b>4</b><span>Print</span></li>
         </ol>
       </section>
-      <div class="workspace">
+      <section class="photo-picker screen-only" aria-labelledby="picker-title">
+        <div class="picker-copy">
+          <h2 id="picker-title">Tap the green button to get started.</h2>
+          <p id="picker-help">
+            Your iPad’s photo library will open so you can pick what to print.
+          </p>
+        </div>
+        <button
+          id="choose"
+          class="button primary"
+          aria-describedby="picker-help"
+        >
+          <span aria-hidden="true">＋</span
+          ><span id="choose-label">Choose Photos</span>
+        </button>
+        <input id="photo-input" type="file" accept="image/*" multiple hidden />
+        <div id="empty" class="start-help">
+          <p>
+            <strong>Choose Photos</strong> → <strong>Photo Library</strong> →
+            select your photos → <strong>Add</strong>
+          </p>
+          <p>Then you can make copies for teammates and print.</p>
+        </div>
+        <p id="photo-count" class="photo-count">Choose up to 30 photos.</p>
+      </section>
+      <div id="workspace" class="workspace" hidden>
         <aside class="controls screen-only" aria-label="Make your photo sheet">
-          <section class="control-section choose-section">
-            <h2><span class="step">1</span> Add photos</h2>
-            <button id="choose" class="button primary full">
-              <span class="button-icon" aria-hidden="true">＋</span>
-              <span>Choose Photos</span></button
-            ><input
-              id="photo-input"
-              type="file"
-              accept="image/*"
-              multiple
-              hidden
-            />
-            <p id="photo-count" class="photo-count">0 / 30 photos</p>
+          <section
+            class="control-section copies-section"
+            aria-labelledby="copies-title"
+          >
+            <h2 id="copies-title">
+              <span class="step">2</span> Copies for teammates
+            </h2>
+            <p>How many of each photo? Tap <strong>+</strong> to add a copy.</p>
+            <div
+              id="photo-copies"
+              class="photo-copies"
+              role="group"
+              aria-label="Copies of each photo"
+            ></div>
+            <p class="copies-note">
+              One copy for each person, including you. Copies share the same
+              crop.
+            </p>
+            <p id="copies-limit" class="copies-limit" hidden>
+              90 photos to print — lower a copy count to make room.
+            </p>
           </section>
           <section class="control-section">
-            <h2><span class="step">2</span> Photos on each page</h2>
+            <h2><span class="step">3</span> Photos on each page</h2>
             <div
               id="layouts"
               class="layout-options"
               role="group"
               aria-label="Photos per page"
             ></div>
-            <label class="toggle"
-              ><input id="cut-guides" type="checkbox" /><span aria-hidden="true">✂</span
-              ><span>Cut lines</span></label
-            >
           </section>
           <section class="adjust-cue">
             <span class="adjust-icon" aria-hidden="true">↻</span>
-            <span><strong>Tap a photo</strong><small>rotate · zoom · crop</small></span>
+            <span
+              ><strong>Tap a photo</strong
+              ><small>rotate · zoom · crop</small></span
+            >
           </section>
           <button id="reset" class="text-button full" disabled>
             ↺ Clear all
@@ -78,36 +115,13 @@
         </aside>
         <section class="preview-area" aria-label="Print preview">
           <div class="preview-heading screen-only">
-            <h2>Your print preview</h2>
+            <h2>What will print</h2>
             <span id="page-count"></span>
-          </div>
-          <div id="empty" class="empty-state screen-only">
-            <div class="sample-sheet" aria-hidden="true">
-              <div class="sample-photo lavender">
-                <span class="sun"></span><span class="mountain"></span>
-              </div>
-              <div class="sample-photo peach">
-                <span class="flower">✳</span>
-              </div>
-              <div class="sample-photo gold">
-                <span class="scribble">✺</span>
-              </div>
-              <div class="sample-photo mint">
-                <span class="sun"></span><span class="mountain"></span>
-              </div>
-              <div class="sample-photo coral"><span class="flower">✦</span></div>
-              <div class="sample-photo blue"><span class="scribble">◒</span></div>
-              <div class="sample-photo gold"><span class="flower">✿</span></div>
-              <div class="sample-photo lavender"><span class="scribble">⌁</span></div>
-              <div class="sample-photo peach"><span class="flower">●</span></div>
-            </div>
-            <div class="empty-arrow" aria-hidden="true">↖</div>
-            <h2>Choose photos to start</h2>
-            <p>They stay on this iPad.</p>
           </div>
           <div id="pages"></div>
           <p id="preview-note" class="preview-note screen-only" hidden>
-            Tap any photo to adjust it. Blank spaces won’t print.
+            Each photo shown here will print once. Use Copies for teammates to
+            add more.
           </p>
         </section>
       </div>
@@ -148,20 +162,20 @@
         <p id="preparing-hint" class="preparing-hint">Keep this screen open</p>
       </div>
     </div>
-    <footer class="bottom-bar screen-only">
+    <footer id="print-bar" class="bottom-bar screen-only" hidden>
       <div>
         <strong id="ready-label">Let’s make something.</strong
         ><span id="ready-detail">Your next project starts here.</span>
       </div>
       <div class="footer-actions">
         <button id="print" class="button primary" disabled>
-          <span aria-hidden="true">▤</span> Print
+          <span aria-hidden="true">4 · ▤</span> Print
           <span aria-hidden="true">↗</span>
         </button>
       </div>
     </footer>
     <div class="version screen-only">
-      COMPASS PHOTO PRINTING <span>v1.01</span>
+      COMPASS PHOTO PRINTING <span>v1.02</span>
     </div>
     <dialog
       id="editor"
@@ -175,6 +189,41 @@
         </div>
         <button id="done" class="button primary" autofocus>Done ✓</button>
       </div>
+      <div
+        class="editor-copies"
+        role="group"
+        aria-labelledby="editor-copies-title"
+      >
+        <div>
+          <strong id="editor-copies-title">Copies for teammates</strong
+          ><small>All copies use these edits.</small>
+        </div>
+        <div class="copy-stepper">
+          <button
+            id="copies-less"
+            class="button secondary"
+            aria-label="Print one fewer copy"
+          >
+            −
+          </button>
+          <output id="editor-copy-count" aria-label="Number of copies"
+            >1</output
+          >
+          <button
+            id="copies-more"
+            class="button secondary"
+            aria-label="Print one more copy"
+          >
+            +
+          </button>
+        </div>
+      </div>
+      <p
+        id="editor-copy-status"
+        class="editor-copy-status"
+        role="status"
+        aria-live="polite"
+      ></p>
       <p id="editor-help">
         Drag to move. Pinch to zoom. Or use the buttons below.
       </p>

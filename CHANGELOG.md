@@ -1,3 +1,8 @@
+Oct 9, 2026 — 1:43 PM PT — HEAD — Make photo selection obvious and add teammate copies
+- Start with one large Choose Photos button and reveal layout/print controls after import.
+- Add per-photo copy counters with shared crops, accurate page totals and memory-safe image reuse.
+- Remove cut guides and refresh the v1.02 offline app shell; verify both browser engines and print pagination.
+
 Sep 16, 2026 — 10:12 PM PT — HEAD — Use the name-free Vercel address for students
 - Make `ipad-printing.vercel.app` the official classroom URL.
 - Remove the unused `photos.tatian.app` project attachment without changing the existing `tatian.app` site.

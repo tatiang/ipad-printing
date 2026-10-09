@@ -1,31 +1,25 @@
-# COMPASS Photo Printing v1.01
+# COMPASS Photo Printing v1.02
 
-COMPASS Photo Printing turns an iPad photo selection into composed US Letter sheets, ready for the native AirPrint interface. This release defaults new sheets to 9-up, enables all five layouts (1, 2, 4, 6 and 9 per page), adds clear current/total preparation progress, and gives students a more visual Add → Layout → Print workflow. Local crop/zoom/rotation, accessible ordering and removal, optional cut guides, and the offline-capable app shell remain intact.
+Students start on a single-action screen: **First, choose your photos**, with a large Choose Photos button and Photo Library instructions. Layout and Print controls appear only after import. That same picker becomes Add More Photos afterward.
+
+## Copies for teammates
+
+Each original has visible minus/count/plus controls beside its thumbnail and inside the editor. Counts start at one and include the student's own copy. Copies stay adjacent, share edits, and are included in preview page counts and composed print output. Reordering moves the entire group; removing the original removes its copies. Limits are 30 copies per original and 90 printed photos per job, with the existing 30-original and 48 MP working-image budget unchanged.
+
+Cut guides are removed from the UI, state, rendering and print styles. All five existing page layouts and the 9-up default remain available.
 
 ## Architecture and privacy
 
-Static HTML/CSS and vanilla JavaScript; no runtime dependencies, build step, accounts, backend, Firestore, analytics or photo uploads. Preview and print share the same HTML image frames and crop transforms. Sequential image normalization bounds working-image resolution and memory. A new service worker caches an explicit app-shell allowlist only; selected photos remain in session memory and Blob URLs are released on removal/reset/page exit.
+The static photo-printing application has no backend or runtime dependencies. Copies reuse each original's Blob URL and crop state rather than allocating more image buffers. Photos remain local in session memory. No auth, Firestore, secrets or calendar-app changes are included. The service worker cache identifier advances to v1.02; close existing app windows to let a waiting shell update activate.
 
-## Verified locally
+## Verified
 
-- Nine Node geometry/order tests and JavaScript syntax/whitespace checks pass.
-- Chromium 153 and Playwright WebKit 26.6 pass all five enabled layout/count cases, EXIF orientation, rotation/zoom/pan, accessible cross-page ordering, deletion, reset, narrow/landscape layouts, 30-photo limits, resource cleanup and no external requests.
-- Chromium touch injection verifies two-finger pinch; desktop WebKit verifies the Safari engine’s functional and print-style behavior.
-- Chromium PDF export has exact Letter dimensions and expected 1/2/3-page counts. Print styles hide all app controls and labels.
-- Both engines reload the app shell after an isolated local server is stopped. WebKit’s simulated-offline mode returned an internal navigation error; the real stopped-server check passes.
+- 12 Node geometry, quantity-limit, grouping and ordering tests pass; JavaScript syntax and diff checks pass.
+- Chromium 153 and WebKit 26.6 pass the complete photo workflow, first-screen visibility at iPad portrait/landscape and phone sizes, native file-picker invocation, per-photo and combined quantity limits, shared crop edits, reordering/removal/reset, resource cleanup and offline shell loading.
+- Chromium PDF export confirms physical Letter dimensions and exact page counts with repeated photos. Both engines confirm print controls stay hidden and no cut guides remain.
+- Increasing copy counts allocates no additional Blob URLs; deletion releases originals once. The existing 30-original/48 MP checks still pass.
+- Screenshots of the first screen, editor and multiple-copy preview were visually reviewed. The WebKit copy-button focus issue found during testing was corrected.
 
-## Remaining hardware/deployment checks
+## Hosting and remaining checks
 
-Native iPadOS Photos picker, real iPad touch/HEIC variants, Home Screen printing, printer discovery and physical Xerox/AirPrint output require the README checklist. Production hosting is active on Vercel; physical hardware validation is not yet claimed.
-
-## COMPASS interface update
-
-Rename the app and Home Screen title to COMPASS Photo Printing, emphasize printing only what is needed for a journal, remove the requested decorative text and duplicate import buttons, and keep a single Choose Photos button for initial and additional selections. Bump the app-shell cache so existing installations can receive the updated UI after closing all app windows.
-
-## Student-first workflow update
-
-Use larger illustrated controls, a three-step visual path, a 9-up paper preview, and a high-contrast print action so the workflow can be understood with minimal reading. While the app prepares selected images, a blocking progress card now shows the current photo, total count, and determinate completion bar. The app remains dependency-free and keeps all photo processing on the device.
-
-## Production hosting
-
-The static app is deployed to Vercel at `ipad-printing.vercel.app` and connected to the GitHub repository for automatic production updates from `main`. This generated Vercel address is the official student-facing URL; no personal custom domain or Cloudflare DNS record is required.
+Production remains https://ipad-printing.vercel.app, updated from main through the existing GitHub/Vercel integration after merge. The separate Coffee Time application is unchanged. Real iPad touch, Photos/HEIC variants and physical AirPrint output still require the README hardware checklist. Print one native job copy: the app already composes each requested individual photo copy.

@@ -1,4 +1,4 @@
-const CACHE = "photo-sheet-v1.01-shell-1";
+const CACHE = "photo-sheet-v1.02-shell-1";
 const SHELL = [
   "./",
   "./index.html",

@@ -6,6 +6,12 @@ import {
   setCropPosition,
   clamp,
   movePhoto,
+  copyCount,
+  totalCopies,
+  expandCopies,
+  changePhotoCopies,
+  MAX_COPIES_PER_PHOTO,
+  MAX_PRINTED_PHOTOS,
 } from "./geometry_v1.00.mjs";
 import {
   MAX_PHOTOS,
@@ -18,7 +24,6 @@ const $ = (id) => document.getElementById(id);
 const state = {
   photos: [],
   layout: { photosPerPage: 9, pageOrientation: "portrait" },
-  cutGuides: false,
   busy: false,
   editingId: null,
 };
@@ -46,10 +51,10 @@ function createPhotoId() {
 
 function setBusy(busy) {
   state.busy = busy;
-  for (const id of ["choose", "photo-input"])
-    $(id).disabled = busy;
+  for (const id of ["choose", "photo-input"]) $(id).disabled = busy;
   for (const button of $("layouts").children) button.disabled = busy;
-  $("cut-guides").disabled = busy;
+  for (const button of $("photo-copies").querySelectorAll("button"))
+    button.disabled = busy || button.dataset.atLimit === "true";
   $("reset").disabled = busy || !state.photos.length;
   $("print").disabled = busy || !state.photos.length || !previewReady;
   $("preparing").hidden = !busy;
@@ -137,47 +142,117 @@ function makeFrame(photo, index, slot, g) {
   return frame;
 }
 
-function addGuides(sheet, g) {
-  if (!state.cutGuides) return;
-  for (let column = 1; column < g.columns; column++) {
-    const guide = document.createElement("span");
-    guide.className = "cut-guide";
-    Object.assign(guide.style, {
-      left: `${((g.margin + column * (g.cellWidth + g.gap) - g.gap / 2) / g.width) * 100}%`,
-      top: `${(g.margin / g.height) * 100}%`,
-      height: `${((g.height - 2 * g.margin) / g.height) * 100}%`,
-      borderLeftWidth: "0.5pt",
-    });
-    sheet.append(guide);
-  }
-  for (let row = 1; row < g.rows; row++) {
-    const guide = document.createElement("span");
-    guide.className = "cut-guide";
-    Object.assign(guide.style, {
-      top: `${((g.margin + row * (g.cellHeight + g.gap) - g.gap / 2) / g.height) * 100}%`,
-      left: `${(g.margin / g.width) * 100}%`,
-      width: `${((g.width - 2 * g.margin) / g.width) * 100}%`,
-      borderTopWidth: "0.5pt",
-    });
-    sheet.append(guide);
+function renderCopyControls() {
+  const total = totalCopies(state.photos);
+  const fragment = document.createDocumentFragment();
+  state.photos.forEach((photo, index) => {
+    const row = document.createElement("div");
+    row.className = "copy-row";
+    row.dataset.sourceId = photo.id;
+    const thumbnail = photoImage(photo);
+    thumbnail.className = "copy-thumbnail";
+    const details = document.createElement("div");
+    details.className = "copy-name";
+    const label = document.createElement("strong");
+    label.textContent = `Photo ${index + 1}`;
+    const caption = document.createElement("small");
+    caption.textContent = "Copies";
+    details.append(label, caption);
+    const stepper = document.createElement("div");
+    stepper.className = "copy-stepper";
+    for (const delta of [-1, 1]) {
+      if (delta === 1) {
+        const output = document.createElement("output");
+        output.textContent = String(copyCount(photo));
+        output.setAttribute("aria-label", `Copies of photo ${index + 1}`);
+        stepper.append(output);
+      }
+      const button = document.createElement("button");
+      button.className = "button secondary";
+      button.textContent = delta === 1 ? "+" : "−";
+      button.dataset.delta = String(delta);
+      button.setAttribute(
+        "aria-label",
+        `${delta === 1 ? "Increase" : "Decrease"} copies of photo ${index + 1}`,
+      );
+      button.dataset.atLimit = String(
+        delta === -1
+          ? copyCount(photo) === 1
+          : copyCount(photo) === MAX_COPIES_PER_PHOTO ||
+              total === MAX_PRINTED_PHOTOS,
+      );
+      stepper.append(button);
+    }
+    row.append(thumbnail, details, stepper);
+    fragment.append(row);
+  });
+  $("photo-copies").replaceChildren(fragment);
+  $("copies-limit").hidden = total < MAX_PRINTED_PHOTOS;
+}
+
+function changeCopies(id, delta, fromSidebar = false) {
+  if (state.busy || !changePhotoCopies(state.photos, id, delta)) return;
+  const index = state.photos.findIndex((photo) => photo.id === id);
+  const photo = state.photos[index];
+  const message = `Photo ${index + 1}: ${copyCount(photo)} ${copyCount(photo) === 1 ? "copy" : "copies"}. ${totalCopies(state.photos)} photos to print.`;
+  const sidebarFocus = fromSidebar
+    ? id
+    : document.activeElement.closest(".copy-row")?.dataset.sourceId;
+  render();
+  if (state.editingId) updateEditor();
+  announce(message);
+  $("editor-copy-status").textContent = message;
+  if (sidebarFocus) {
+    const row = [...$("photo-copies").children].find(
+      (item) => item.dataset.sourceId === sidebarFocus,
+    );
+    const buttons = [...row.querySelectorAll("button")];
+    (
+      buttons.find(
+        (button) => Number(button.dataset.delta) === delta && !button.disabled,
+      ) || buttons.find((button) => !button.disabled)
+    )?.focus({ preventScroll: true });
   }
 }
 
 function render() {
   const count = state.photos.length;
-  const groups = paginate(state.photos, state.layout.photosPerPage);
+  const total = totalCopies(state.photos);
+  const groups = paginate(
+    expandCopies(state.photos),
+    state.layout.photosPerPage,
+  );
   const g = geometry();
   for (const button of $("layouts").children)
     button.setAttribute(
       "aria-pressed",
       String(Number(button.dataset.count) === state.layout.photosPerPage),
     );
-  $("photo-count").textContent = `${count} / ${MAX_PHOTOS} photos`;
+  $("photo-count").textContent = count
+    ? `${count} of ${MAX_PHOTOS} photos chosen · ${total} to print`
+    : `Choose up to ${MAX_PHOTOS} photos.`;
+  document.body.classList.toggle("has-photos", count > 0);
+  $("workspace").hidden = !count;
+  $("print-bar").hidden = !count;
+  $("intro-kicker").textContent = count
+    ? "PHOTOS CHOSEN · NEXT, SET YOUR COPIES"
+    : "START HERE · STEP 1";
+  $("intro-title").textContent = count
+    ? "Make a copy for everyone."
+    : "First, choose your photos.";
+  $("picker-title").textContent = count
+    ? "Need another photo?"
+    : "Tap the green button to get started.";
+  $("picker-help").textContent = count
+    ? "Use the same button to choose more from your library."
+    : "Your iPad’s photo library will open so you can pick what to print.";
+  $("choose-label").textContent = count ? "Add More Photos" : "Choose Photos";
+  renderCopyControls();
   $("page-count").textContent = count
     ? `${groups.length} ${groups.length === 1 ? "page" : "pages"} · US Letter`
     : "";
   $("ready-label").textContent = count
-    ? `${count} ${count === 1 ? "photo" : "photos"} ready`
+    ? `${total} ${total === 1 ? "photo" : "photos"} to print`
     : "Add photos to begin";
   $("ready-detail").textContent = count
     ? `${groups.length} ${groups.length === 1 ? "page" : "pages"} · ${state.layout.photosPerPage} per page`
@@ -186,14 +261,12 @@ function render() {
   journey.forEach((step) => step.classList.remove("current", "done"));
   if (count) {
     journey[0].classList.add("done");
-    journey[1].classList.add("done");
-    journey[2].classList.add("current");
+    journey[1].classList.add("current");
   } else {
     journey[0].classList.add("current");
   }
   $("empty").hidden = count > 0;
   $("preview-note").hidden = !count;
-  $("cut-guides").checked = state.cutGuides;
   const fragment = document.createDocumentFragment();
   groups.forEach((photos, page) => {
     const wrapper = document.createElement("section");
@@ -205,11 +278,8 @@ function render() {
     const sheet = document.createElement("div");
     sheet.className = "sheet";
     photos.forEach((photo, slot) =>
-      sheet.append(
-        makeFrame(photo, page * state.layout.photosPerPage + slot, slot, g),
-      ),
+      sheet.append(makeFrame(photo, state.photos.indexOf(photo), slot, g)),
     );
-    addGuides(sheet, g);
     wrapper.append(label, sheet);
     fragment.append(wrapper);
   });
@@ -235,10 +305,17 @@ function render() {
 
 async function importPhotos(files) {
   if (state.busy || !files.length) return;
-  const available = MAX_PHOTOS - state.photos.length;
+  const available = Math.min(
+    MAX_PHOTOS - state.photos.length,
+    MAX_PRINTED_PHOTOS - totalCopies(state.photos),
+  );
   const selected = files.slice(0, available);
   if (!selected.length) {
-    announce("Your sheet has 30 photos. Remove one to add another.");
+    announce(
+      state.photos.length >= MAX_PHOTOS
+        ? "Your sheet has 30 photos. Remove one to add another."
+        : "You have 90 photos to print. Lower a copy count to add a new photo.",
+    );
     return;
   }
   setBusy(true);
@@ -272,6 +349,7 @@ async function importPhotos(files) {
         const image = await preparePhoto(file, maxPixels);
         state.photos.push({
           id: createPhotoId(),
+          copies: 1,
           file,
           ...image,
           rotation: 0,
@@ -291,14 +369,16 @@ async function importPhotos(files) {
     const messages = [];
     if (added)
       messages.push(
-        `${added} ${added === 1 ? "photo added" : "photos added"}. Tap a photo to make it yours.`,
+        `${added} ${added === 1 ? "photo added" : "photos added"}. Need extras? Set Copies for teammates.`,
       );
     if (failed)
       messages.push(
         `${failed === 1 ? "One photo couldn’t" : `${failed} photos couldn’t`} be opened. Try a JPEG or PNG${tooLarge ? " or a smaller photo" : ""}.`,
       );
     if (files.length > available)
-      messages.push("You can use up to 30 photos at a time.");
+      messages.push(
+        "You can choose up to 30 photos and print up to 90 copies in total. Lower a copy count or remove a photo to make room.",
+      );
     announce(messages.join(" "));
   } catch {
     announce(
@@ -313,6 +393,7 @@ async function importPhotos(files) {
 function openEditor(id) {
   state.editingId = id;
   editorReturnId = id;
+  $("editor-copy-status").textContent = "";
   $("edit-frame").replaceChildren(photoImage(editingPhoto()));
   $("editor").showModal();
   sizeEditor();
@@ -340,15 +421,23 @@ function updateEditor() {
   $("order-label").textContent = `${index + 1} of ${state.photos.length}`;
   $("earlier").disabled = index === 0;
   $("later").disabled = index === state.photos.length - 1;
+  $("editor-copy-count").textContent = String(copyCount(photo));
+  $("copies-less").disabled = copyCount(photo) === 1;
+  $("copies-more").disabled =
+    copyCount(photo) === MAX_COPIES_PER_PHOTO ||
+    totalCopies(state.photos) === MAX_PRINTED_PHOTOS;
+  $("remove").textContent =
+    copyCount(photo) > 1
+      ? `⌫ Remove photo (${copyCount(photo)} copies)`
+      : "⌫ Remove photo";
   $("zoom").value = String(photo.scale);
   $("zoom-value").value = `${Math.round(photo.scale * 100)}%`;
   $("zoom-out").disabled = photo.scale <= 1;
   $("zoom-in").disabled = photo.scale >= 4;
   // Keep the underlying print DOM current even when a browser print shortcut is used.
-  const frame = [...$("pages").querySelectorAll(".photo-frame")].find(
-    (element) => element.dataset.photoId === photo.id,
-  );
-  if (frame) applyCrop(frame, photo);
+  for (const frame of $("pages").querySelectorAll(".photo-frame")) {
+    if (frame.dataset.photoId === photo.id) applyCrop(frame, photo);
+  }
 }
 
 function zoomTo(value, anchorX = 0, anchorY = 0) {
@@ -502,10 +591,21 @@ $("photo-input").addEventListener("change", (event) => {
   importPhotos(files);
 });
 $("choose").addEventListener("click", () => $("photo-input").click());
-$("cut-guides").addEventListener("change", (event) => {
-  state.cutGuides = event.target.checked;
-  render();
+$("photo-copies").addEventListener("click", (event) => {
+  const button = event.target.closest("button[data-delta]");
+  if (button && !button.disabled)
+    changeCopies(
+      button.closest(".copy-row").dataset.sourceId,
+      Number(button.dataset.delta),
+      true,
+    );
 });
+$("copies-less").addEventListener("click", () =>
+  changeCopies(state.editingId, -1),
+);
+$("copies-more").addEventListener("click", () =>
+  changeCopies(state.editingId, 1),
+);
 $("reset").addEventListener("click", () => {
   if (state.photos.length) $("reset-dialog").showModal();
 });
@@ -514,7 +614,6 @@ $("confirm-reset").addEventListener("click", () => {
   for (const photo of state.photos) releasePhoto(photo);
   state.photos = [];
   state.layout.photosPerPage = 9;
-  state.cutGuides = false;
   $("photo-input").value = "";
   $("reset-dialog").close();
   render();
