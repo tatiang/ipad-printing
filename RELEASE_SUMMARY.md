@@ -4,9 +4,13 @@ Students start on a single-action screen: **First, choose your photos**, with a 
 
 ## Print reliability patch
 
-Print readiness now follows image load/error events rather than optional decode promises. Closing the editor preserves already-loaded preview frames, while removing a photo explicitly rebuilds the pages. Loading and image-error messages appear beside Print; the native print call remains synchronous with the tap. The offline shell cache advances to `photo-sheet-v1.02-shell-2` without replacing a live photo session.
+Print readiness now follows image load/error events rather than optional decode promises. Closing the editor preserves already-loaded preview frames, while removing a photo explicitly rebuilds the pages. Loading and image-error messages appear beside Print; the native print call remains synchronous with the tap. The offline shell cache advances to `photo-sheet-v1.02-shell-3` without replacing a live photo session.
 
 Patch verification: all 12 Node tests and the complete Chromium 151/WebKit 26.5 browser suites pass. Regression coverage simulates rejected and stalled preview decoding, taps Print repeatedly after edits, and verifies that broken image sources remain blocked. This reproduces an application failure path, not a confirmed physical iPad or AirPrint failure.
+
+## Photo preparation optimization
+
+Skip the redundant decode of each canvas-generated JPEG; the existing preview load/error gate still protects printing. Resolution, JPEG quality, EXIF normalization and memory limits are unchanged. Completion messages report local preparation time, excluding the native picker. Nine synthetic 12 MP JPEGs measured 752 → 638 ms in Chromium and 1145 → 737 ms in WebKit on the development Mac (single before/after runs, not an iPhone speed guarantee).
 
 ## Copies for teammates
 

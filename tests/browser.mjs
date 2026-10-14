@@ -101,6 +101,12 @@ for (const [engine, browserType] of [
         window.testURLs.delete(url);
         revoke(url);
       };
+      window.imageDecodeCalls = 0;
+      const decode = HTMLImageElement.prototype.decode;
+      HTMLImageElement.prototype.decode = function () {
+        window.imageDecodeCalls++;
+        return decode.call(this);
+      };
       window.printCalls = 0;
       window.print = () => {
         window.printCalls++;
@@ -211,6 +217,9 @@ for (const [engine, browserType] of [
     });
     await page.waitForFunction(() => !document.getElementById("print").disabled,
       null, { timeout: 5000 });
+    assert.equal(await page.evaluate(() => window.imageDecodeCalls), 1,
+      "one source decode, no redundant working-JPEG decode");
+    assert.match(await page.locator("#status").textContent(), /Prepared on this device in \d+\.\d seconds/);
     await page.locator("#print").tap();
     assert.equal(await page.evaluate(() => window.printCalls), 1);
     await page.locator(".photo-frame").first().tap();

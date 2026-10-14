@@ -58,13 +58,8 @@ export async function preparePhoto(file, maxPixels) {
     );
     if (!blob) throw new Error("memory");
     const src = URL.createObjectURL(blob);
-    try {
-      const check = await decodeImage(src);
-      check.removeAttribute("src");
-    } catch (error) {
-      URL.revokeObjectURL(src);
-      throw error;
-    }
+    // Canvas has already produced a valid JPEG. The preview's load/error gate
+    // verifies it before Print is enabled; decoding it here duplicates that work.
     return { src, naturalWidth: canvas.width, naturalHeight: canvas.height };
   } finally {
     image?.removeAttribute("src");

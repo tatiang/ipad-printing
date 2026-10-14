@@ -1,3 +1,8 @@
+Oct 14, 2026 — 12:31 PM PT — HEAD — Prepare photos with less duplicate work
+- Skip redundant JPEG decoding without changing resolution, print quality or memory limits.
+- Report local preparation time separately from the native photo-picker wait.
+- Refresh the offline shell and verify source decoding, orientation and printing regressions.
+
 Oct 14, 2026 — 12:12 PM PT — HEAD — Keep Print responsive after choosing and editing photos
 - Enable Print from successful image loading instead of an optional decode promise that can reject or stall.
 - Preserve loaded previews when closing the editor and explain loading failures beside Print.

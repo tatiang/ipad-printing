@@ -338,6 +338,7 @@ async function importPhotos(files) {
     );
     return;
   }
+  const preparationStarted = performance.now();
   setBusy(true);
   const maxPixels = pixelLimit(state.photos.length + selected.length);
   const photosToResize = state.photos.filter(
@@ -389,7 +390,7 @@ async function importPhotos(files) {
     const messages = [];
     if (added)
       messages.push(
-        `${added} ${added === 1 ? "photo added" : "photos added"}. Need extras? Set Copies for teammates.`,
+        `${added} ${added === 1 ? "photo added" : "photos added"}. Prepared on this device in ${((performance.now() - preparationStarted) / 1000).toFixed(1)} seconds. Need extras? Set Copies for teammates.`,
       );
     if (failed)
       messages.push(
