@@ -20,3 +20,9 @@
 - Baseline: nine generated 4032x3024 JPEGs, Chromium 752 ms and WebKit 1145 ms; 18 explicit decodes each.
 - After: Chromium 638 ms and WebKit 737 ms; nine explicit decodes each. These single-run desktop timings only establish reduced work, not the cause of the reported 30-second phone delay.
 - Final validation: 12 Node tests and full Chromium/WebKit suites pass, including one source decode per imported photo, timing message, EXIF orientation, memory budget, print taps and offline shell.
+
+## Follow-up: visible timing
+- User could not see timing: completion text was below the full preview and shared with transient status announcements.
+- Place last-import timing in a dedicated fixed Print-bar element; preserve it across crop/layout/copy changes, replace it on import, and clear it on reset.
+- Acceptance: visible within 390x844 and 768x1024 viewports, persists through editing, clears on reset, and existing print workflow stays intact.
+- Verification: initial mobile check exposed the existing hidden footer-information area; changed the phone footer to wrap and show it. Final full Chromium/WebKit suites, 12 Node tests, syntax and diff checks pass. Phone screenshot inspected; timing is present above Print and persists after editing.

@@ -219,7 +219,15 @@ for (const [engine, browserType] of [
       null, { timeout: 5000 });
     assert.equal(await page.evaluate(() => window.imageDecodeCalls), 1,
       "one source decode, no redundant working-JPEG decode");
-    assert.match(await page.locator("#status").textContent(), /Prepared on this device in \d+\.\d seconds/);
+    assert.match(await page.locator("#preparation-time").textContent(), /Last import: 1 photo prepared in \d+\.\d seconds/);
+    const preparationText = await page.locator("#preparation-time").textContent();
+    for (const viewport of [{width: 390, height: 844}, {width: 768, height: 1024}]) {
+      await page.setViewportSize(viewport);
+      const timing = await page.locator("#preparation-time").boundingBox();
+      assert.ok(timing && timing.y >= 0 && timing.y + timing.height <= viewport.height,
+        "preparation time stays visible in the fixed print bar");
+    }
+    await page.setViewportSize({width: 1024, height: 1366});
     await page.locator("#print").tap();
     assert.equal(await page.evaluate(() => window.printCalls), 1);
     await page.locator(".photo-frame").first().tap();
@@ -230,6 +238,7 @@ for (const [engine, browserType] of [
     assert.equal(await page.evaluate(() => window.readyFrame === document.querySelector("#pages img")), true);
     await page.locator("#print").tap();
     assert.equal(await page.evaluate(() => window.printCalls), 2);
+    assert.equal(await page.locator("#preparation-time").textContent(), preparationText);
     await page.evaluate(() => { window.stallPreviewDecode = true; });
     await page.locator('[data-count="4"]').tap();
     await page.locator("#print").tap();
@@ -242,6 +251,7 @@ for (const [engine, browserType] of [
     await page.evaluate(() => { window.printCalls = 0; });
     await page.locator("#reset").click();
     await page.locator("#confirm-reset").click();
+    assert.equal(await page.locator("#preparation-time").isHidden(), true);
     console.log(`${engine}: loaded images with rejected decode and repeated Print taps passed`);
     const importFiles = async (list, observeProgress = false) => {
       await page.locator("#photo-input").setInputFiles(list);

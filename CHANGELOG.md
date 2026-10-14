@@ -1,3 +1,8 @@
+Oct 14, 2026 — 12:51 PM PT — HEAD — Keep preparation time visible beside Print
+- Move last-import timing out of transient status messages into the persistent Print bar.
+- Show footer information on phone screens and preserve timing through photo edits.
+- Refresh the offline shell and verify timing visibility at phone and iPad sizes.
+
 Oct 14, 2026 — 12:31 PM PT — HEAD — Prepare photos with less duplicate work
 - Skip redundant JPEG decoding without changing resolution, print quality or memory limits.
 - Report local preparation time separately from the native photo-picker wait.

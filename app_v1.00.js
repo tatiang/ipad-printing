@@ -338,6 +338,7 @@ async function importPhotos(files) {
     );
     return;
   }
+  $("preparation-time").hidden = true;
   const preparationStarted = performance.now();
   setBusy(true);
   const maxPixels = pixelLimit(state.photos.length + selected.length);
@@ -388,10 +389,14 @@ async function importPhotos(files) {
       }
     }
     const messages = [];
-    if (added)
+    if (added) {
+      const seconds = ((performance.now() - preparationStarted) / 1000).toFixed(1);
+      $("preparation-time").textContent = `Last import: ${added} ${added === 1 ? "photo" : "photos"} prepared in ${seconds} seconds`;
+      $("preparation-time").hidden = false;
       messages.push(
-        `${added} ${added === 1 ? "photo added" : "photos added"}. Prepared on this device in ${((performance.now() - preparationStarted) / 1000).toFixed(1)} seconds. Need extras? Set Copies for teammates.`,
+        `${added} ${added === 1 ? "photo added" : "photos added"}. Need extras? Set Copies for teammates.`,
       );
+    }
     if (failed)
       messages.push(
         `${failed === 1 ? "One photo couldn’t" : `${failed} photos couldn’t`} be opened. Try a JPEG or PNG${tooLarge ? " or a smaller photo" : ""}.`,
@@ -636,6 +641,8 @@ $("cancel-reset").addEventListener("click", () => $("reset-dialog").close());
 $("confirm-reset").addEventListener("click", () => {
   for (const photo of state.photos) releasePhoto(photo);
   state.photos = [];
+  $("preparation-time").hidden = true;
+  $("preparation-time").textContent = "";
   state.layout.photosPerPage = 9;
   $("photo-input").value = "";
   $("reset-dialog").close();
