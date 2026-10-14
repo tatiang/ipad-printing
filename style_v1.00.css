@@ -687,6 +687,11 @@ main {
   font-size: 11px;
   color: var(--muted);
 }
+#preparation-time {
+  display: block;
+  margin-top: 5px;
+  font-weight: 700;
+}
 .footer-actions {
   display: flex;
   gap: 10px;
@@ -959,8 +964,11 @@ dialog::backdrop {
     padding: 13px 16px;
     padding-bottom: max(13px, env(safe-area-inset-bottom));
   }
+  .bottom-bar {
+    flex-wrap: wrap;
+  }
   .bottom-bar > div:first-child {
-    display: none;
+    width: 100%;
   }
   .footer-actions {
     width: 100%;

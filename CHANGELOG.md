@@ -1,3 +1,18 @@
+Oct 14, 2026 — 12:51 PM PT — HEAD — Keep preparation time visible beside Print
+- Move last-import timing out of transient status messages into the persistent Print bar.
+- Show footer information on phone screens and preserve timing through photo edits.
+- Refresh the offline shell and verify timing visibility at phone and iPad sizes.
+
+Oct 14, 2026 — 12:31 PM PT — HEAD — Prepare photos with less duplicate work
+- Skip redundant JPEG decoding without changing resolution, print quality or memory limits.
+- Report local preparation time separately from the native photo-picker wait.
+- Refresh the offline shell and verify source decoding, orientation and printing regressions.
+
+Oct 14, 2026 — 12:12 PM PT — HEAD — Keep Print responsive after choosing and editing photos
+- Enable Print from successful image loading instead of an optional decode promise that can reject or stall.
+- Preserve loaded previews when closing the editor and explain loading failures beside Print.
+- Refresh the offline app shell and add touch-tap regression coverage.
+
 Oct 9, 2026 — 1:43 PM PT — HEAD — Make photo selection obvious and add teammate copies
 - Start with one large Choose Photos button and reveal layout/print controls after import.
 - Add per-photo copy counters with shared crops, accurate page totals and memory-safe image reuse.
