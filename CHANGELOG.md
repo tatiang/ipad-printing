@@ -1,3 +1,8 @@
+Oct 14, 2026 — 12:12 PM PT — HEAD — Keep Print responsive after choosing and editing photos
+- Enable Print from successful image loading instead of an optional decode promise that can reject or stall.
+- Preserve loaded previews when closing the editor and explain loading failures beside Print.
+- Refresh the offline app shell and add touch-tap regression coverage.
+
 Oct 9, 2026 — 1:43 PM PT — HEAD — Make photo selection obvious and add teammate copies
 - Start with one large Choose Photos button and reveal layout/print controls after import.
 - Add per-photo copy counters with shared crops, accurate page totals and memory-safe image reuse.

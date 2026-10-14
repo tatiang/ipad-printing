@@ -76,7 +76,7 @@ A maximum of 30 photos, 40 MiB per source file, and 64 megapixels per decoded so
 - Frame positions reserve **0.25-inch outer margins** and **0.15-inch gaps**.
 - Each wrapper forces a page break except the last. Empty slots have no DOM image, so they print white.
 - Navigation, controls, dialogs, status, page labels and photo badges use print hiding rules. Only composed sheets print.
-- A blocking, determinate progress card shows current/total preparation while files are decoded sequentially. Print remains disabled until all working preview images are decoded. The click calls `window.print()` synchronously, preserving the browser’s user gesture.
+- A blocking, determinate progress card shows current/total preparation while files are decoded sequentially. Print remains disabled until all working preview images have loaded successfully; optional `decode()` promises cannot lock it out. Loading or failed-photo status appears beside Print. Closing the editor preserves loaded preview images. The click calls `window.print()` synchronously, preserving the browser’s user gesture.
 - Crops are percentage-based and use identical frame proportions in preview/editor/print, independent of viewport dimensions.
 
 Browsers and printer settings ultimately control paper size, scaling, headers/footers, and image color. Select **US Letter, portrait, 100% / actual size** where available; turn off browser headers/footers. Do not select the printer’s multiple-pages-per-sheet feature. A printer requiring more than 0.25-inch margins can clip edges; verify the school printer before classroom rollout.

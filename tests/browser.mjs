@@ -193,6 +193,47 @@ for (const [engine, browserType] of [
       ...(i % 2 ? landscape : portrait),
       name: `photo-${i + 1}.png`,
     }));
+    // A loaded preview must not depend on Safari's optional decode promise.
+    await page.evaluate(() => {
+      const decode = HTMLImageElement.prototype.decode;
+      HTMLImageElement.prototype.decode = function () {
+        if (this.closest("#pages") && window.stallPreviewDecode)
+          return new Promise(() => {});
+        if (this.closest("#pages"))
+          return Promise.reject(new DOMException("Decode interrupted", "EncodingError"));
+        return decode.call(this);
+      };
+    });
+    await page.locator("#photo-input").setInputFiles([portrait]);
+    await page.waitForFunction(() => {
+      const image = document.querySelector("#pages img");
+      return image?.complete && image.naturalWidth > 0;
+    });
+    await page.waitForFunction(() => !document.getElementById("print").disabled,
+      null, { timeout: 5000 });
+    await page.locator("#print").tap();
+    assert.equal(await page.evaluate(() => window.printCalls), 1);
+    await page.locator(".photo-frame").first().tap();
+    await page.evaluate(() => { window.readyFrame = document.querySelector("#pages img"); });
+    await page.locator("#zoom-in").tap();
+    await page.locator("#done").tap();
+    await page.waitForFunction(() => !document.getElementById("editor").open);
+    assert.equal(await page.evaluate(() => window.readyFrame === document.querySelector("#pages img")), true);
+    await page.locator("#print").tap();
+    assert.equal(await page.evaluate(() => window.printCalls), 2);
+    await page.evaluate(() => { window.stallPreviewDecode = true; });
+    await page.locator('[data-count="4"]').tap();
+    await page.locator("#print").tap();
+    assert.equal(await page.evaluate(() => window.printCalls), 3);
+    // A truly unavailable source must still block printing and explain recovery.
+    await page.evaluate(() => URL.revokeObjectURL(document.querySelector("#pages img").src));
+    await page.locator('[data-count="9"]').tap();
+    await page.waitForFunction(() => document.getElementById("ready-detail").textContent.includes("did not load"));
+    assert.equal(await page.locator("#print").isDisabled(), true);
+    await page.evaluate(() => { window.printCalls = 0; });
+    await page.locator("#reset").click();
+    await page.locator("#confirm-reset").click();
+    console.log(`${engine}: loaded images with rejected decode and repeated Print taps passed`);
     const importFiles = async (list, observeProgress = false) => {
       await page.locator("#photo-input").setInputFiles(list);
       if (observeProgress) {

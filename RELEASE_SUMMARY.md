@@ -2,6 +2,12 @@
 
 Students start on a single-action screen: **First, choose your photos**, with a large Choose Photos button and Photo Library instructions. Layout and Print controls appear only after import. That same picker becomes Add More Photos afterward.
 
+## Print reliability patch
+
+Print readiness now follows image load/error events rather than optional decode promises. Closing the editor preserves already-loaded preview frames, while removing a photo explicitly rebuilds the pages. Loading and image-error messages appear beside Print; the native print call remains synchronous with the tap. The offline shell cache advances to `photo-sheet-v1.02-shell-2` without replacing a live photo session.
+
+Patch verification: all 12 Node tests and the complete Chromium 151/WebKit 26.5 browser suites pass. Regression coverage simulates rejected and stalled preview decoding, taps Print repeatedly after edits, and verifies that broken image sources remain blocked. This reproduces an application failure path, not a confirmed physical iPad or AirPrint failure.
+
 ## Copies for teammates
 
 Each original has visible minus/count/plus controls beside its thumbnail and inside the editor. Counts start at one and include the student's own copy. Copies stay adjacent, share edits, and are included in preview page counts and composed print output. Reordering moves the entire group; removing the original removes its copies. Limits are 30 copies per original and 90 printed photos per job, with the existing 30-original and 48 MP working-image budget unchanged.

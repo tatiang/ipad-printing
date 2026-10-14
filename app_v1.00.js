@@ -215,6 +215,24 @@ function changeCopies(id, delta, fromSidebar = false) {
   }
 }
 
+// Loading is sufficient for native printing. decode() can reject independently
+// of a successfully loaded image, so it must not permanently lock the Print button.
+function waitForPreviewImage(image) {
+  return new Promise((resolve, reject) => {
+    const finish = () => {
+      image.removeEventListener("load", finish);
+      image.removeEventListener("error", finish);
+      if (image.naturalWidth > 0) resolve();
+      else reject(new Error("Preview image failed to load"));
+    };
+    if (image.complete) finish();
+    else {
+      image.addEventListener("load", finish);
+      image.addEventListener("error", finish);
+    }
+  });
+}
+
 function render() {
   const count = state.photos.length;
   const total = totalCopies(state.photos);
@@ -286,20 +304,22 @@ function render() {
   $("pages").replaceChildren(fragment);
   previewReady = false;
   setBusy(state.busy);
+  if (count) $("ready-detail").textContent = "Getting your print preview ready…";
   const generation = ++renderGeneration;
   Promise.all(
-    [...$("pages").querySelectorAll("img")].map((image) => image.decode()),
+    [...$("pages").querySelectorAll("img")].map(waitForPreviewImage),
   )
     .then(() => {
       if (generation !== renderGeneration) return;
       previewReady = true;
       setBusy(state.busy);
+      if (count)
+        $("ready-detail").textContent = `${groups.length} ${groups.length === 1 ? "page" : "pages"} · ${state.layout.photosPerPage} per page`;
     })
     .catch(() => {
-      if (generation === renderGeneration)
-        announce(
-          "A photo could not be prepared for printing. Remove it and choose it again.",
-        );
+      if (generation !== renderGeneration) return;
+      $("ready-detail").textContent = "A photo did not load. Remove it and choose it again.";
+      announce($("ready-detail").textContent);
     });
 }
 
@@ -572,7 +592,8 @@ $("editor").addEventListener("close", () => {
   gesture = null;
   state.editingId = null;
   $("edit-frame").replaceChildren();
-  render();
+  // Crop changes update the existing frames; order/copy/removal actions already
+  // render their changes. Preserve loaded images when simply closing the editor.
   const frame = [...$("pages").querySelectorAll(".photo-frame")].find(
     (element) => element.dataset.photoId === editorReturnId,
   );
@@ -582,6 +603,7 @@ $("remove").addEventListener("click", () => {
   const photo = editingPhoto();
   state.photos = state.photos.filter((item) => item.id !== photo.id);
   releasePhoto(photo);
+  render();
   $("editor").close();
   announce("Photo removed. Your original is still in your library.");
 });
@@ -622,7 +644,7 @@ $("confirm-reset").addEventListener("click", () => {
 });
 $("print").addEventListener("click", () => {
   if (!state.photos.length || state.busy || !previewReady) return;
-  // Decoding finishes before enabling Print; call synchronously to retain Safari's user activation.
+  // Images load before enabling Print; call synchronously to retain Safari's user activation.
   try {
     window.print();
   } catch {
