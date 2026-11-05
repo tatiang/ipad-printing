@@ -1317,3 +1317,7 @@ body:not(.has-photos) .intro {
     visibility: visible;
   }
 }
+
+/* Keep both export routes reachable on smaller iPad screens. */
+.footer-actions { flex-wrap: wrap; }
+#pdf-download { text-decoration: none; }

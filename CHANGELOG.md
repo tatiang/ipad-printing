@@ -1,3 +1,8 @@
+Nov 5, 2026 — HEAD — Add Save PDF fallback (v1.03)
+- Generate local Letter PDFs with current crops, rotations, layouts and copies.
+- Add explicit Download PDF action for iPad browsers; retain native Print.
+- Refresh offline shell and document the fallback.
+
 Oct 9, 2026 — 1:43 PM PT — HEAD — Make photo selection obvious and add teammate copies
 - Start with one large Choose Photos button and reveal layout/print controls after import.
 - Add per-photo copy counters with shared crops, accurate page totals and memory-safe image reuse.

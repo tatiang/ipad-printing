@@ -1,4 +1,4 @@
-# COMPASS Photo Printing — v1.02
+# COMPASS Photo Printing — v1.03
 
 A private, static photo-sheet maker for K–8 students using iPad Safari. Choose photos, pick **1, 2, 4, 6, or 9 per page**, tap a photo to adjust it, and print through the normal iPadOS/AirPrint interface. No accounts, uploads, database, runtime dependencies, or build step.
 
@@ -148,3 +148,9 @@ The offline check stops an isolated test server, rather than relying on WebKit�
 ## Known limitations / release status
 
 v1.02 is portrait Letter only, with no cloud drafts or photo recovery after refresh. Very large files, unsupported codecs and excessive batches are rejected politely. Working-image normalization trades some source resolution for iPad memory safety. Browser/OS printing can override CSS preferences. Physical iPad/AirPrint QA is required before calling the deployment classroom-validated; software tests alone do not prove hardware acceptance.
+
+## Save PDF fallback (v1.03)
+
+Tap **Save PDF**, wait for preparation, then tap **Download PDF**. If iPad Chrome opens a PDF viewer, use Share to save to Files or print the PDF. The PDF uses the current layout, crops, rotations, ordering and teammate copies on US Letter pages. Each page is flattened locally at 150 dpi with JPEG compression; a single reusable canvas limits raster memory. Photos are never uploaded. Changing the sheet discards its previous PDF link. Direct Print continues to use the existing native print path.
+
+Close all app tabs and reopen online to receive the updated offline shell. Physical download/share behavior and AirPrint still need verification on the managed iPad.

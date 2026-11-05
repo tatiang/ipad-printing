@@ -10,7 +10,7 @@
     />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-title" content="COMPASS Photo Printing" />
-    <title>COMPASS Photo Printing · v1.02</title>
+    <title>COMPASS Photo Printing · v1.03</title>
     <link rel="icon" href="icons/icon.svg" type="image/svg+xml" />
     <link rel="apple-touch-icon" href="icons/icon-192.png" />
     <link rel="manifest" href="manifest.webmanifest" />
@@ -168,6 +168,8 @@
         ><span id="ready-detail">Your next project starts here.</span>
       </div>
       <div class="footer-actions">
+        <button id="save-pdf" class="button secondary" disabled>Save PDF</button>
+        <a id="pdf-download" class="button secondary" hidden>Download PDF</a>
         <button id="print" class="button primary" disabled>
           <span aria-hidden="true">4 · ▤</span> Print
           <span aria-hidden="true">↗</span>
@@ -175,7 +177,7 @@
       </div>
     </footer>
     <div class="version screen-only">
-      COMPASS PHOTO PRINTING <span>v1.02</span>
+      COMPASS PHOTO PRINTING <span>v1.03</span>
     </div>
     <dialog
       id="editor"

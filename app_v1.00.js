@@ -1,3 +1,4 @@
+import { createPhotoPDF } from "./pdf_v1.03.mjs";
 import {
   LAYOUTS,
   layoutGeometry,
@@ -32,6 +33,12 @@ let gesture = null;
 let renderGeneration = 0;
 let previewReady = false;
 let editorReturnId = null;
+let pdfURL = null;
+function clearPDF() {
+  if (pdfURL) URL.revokeObjectURL(pdfURL);
+  pdfURL = null;
+  $("pdf-download").hidden = true;
+}
 const geometry = () =>
   layoutGeometry(state.layout.photosPerPage, state.layout.pageOrientation);
 const editingPhoto = () =>
@@ -57,6 +64,7 @@ function setBusy(busy) {
     button.disabled = busy || button.dataset.atLimit === "true";
   $("reset").disabled = busy || !state.photos.length;
   $("print").disabled = busy || !state.photos.length || !previewReady;
+  $("save-pdf").disabled = busy || !state.photos.length || !previewReady;
   $("preparing").hidden = !busy;
   document.body.classList.toggle("is-preparing", busy);
   $("pages").setAttribute("aria-busy", String(busy));
@@ -216,6 +224,7 @@ function changeCopies(id, delta, fromSidebar = false) {
 }
 
 function render() {
+  clearPDF();
   const count = state.photos.length;
   const total = totalCopies(state.photos);
   const groups = paginate(
@@ -619,6 +628,30 @@ $("confirm-reset").addEventListener("click", () => {
   render();
   announce("A fresh start. Choose photos to make a new sheet.");
   $("choose").focus();
+});
+$("save-pdf").addEventListener("click", async () => {
+  if (!state.photos.length || state.busy || !previewReady) return;
+  clearPDF();
+  setBusy(true);
+  $("preparing-title").textContent = "Preparing your PDF";
+  try {
+    const blob = await createPhotoPDF(state.photos, state.layout, (page, total) => {
+      updatePreparationProgress(page, total);
+      $("preparing-detail").textContent = `Page ${page + 1} of ${total}`;
+    });
+    pdfURL = URL.createObjectURL(blob);
+    $("pdf-download").href = pdfURL;
+    $("pdf-download").download = "COMPASS-photos.pdf";
+    $("pdf-download").hidden = false;
+    announce("PDF ready. Tap Download PDF. If it opens in a viewer, use Share to save to Files or print.");
+    // A second, explicit tap retains the user gesture on older iPad browsers.
+    $("pdf-download").focus();
+  } catch {
+    announce("The PDF could not be prepared. Try fewer photos, then tap Save PDF again.");
+  } finally {
+    setBusy(false);
+    $("preparing-title").textContent = "Getting photos ready";
+  }
 });
 $("print").addEventListener("click", () => {
   if (!state.photos.length || state.busy || !previewReady) return;
