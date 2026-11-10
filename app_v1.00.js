@@ -34,9 +34,12 @@ let renderGeneration = 0;
 let previewReady = false;
 let editorReturnId = null;
 let pdfURL = null;
+let pdfFile = null;
 function clearPDF() {
   if (pdfURL) URL.revokeObjectURL(pdfURL);
   pdfURL = null;
+  pdfFile = null;
+  $("share-pdf").hidden = true;
   $("pdf-download").hidden = true;
 }
 const geometry = () =>
@@ -640,6 +643,8 @@ $("save-pdf").addEventListener("click", async () => {
       $("preparing-detail").textContent = `Page ${page + 1} of ${total}`;
     });
     pdfURL = URL.createObjectURL(blob);
+    pdfFile = new File([blob], "COMPASS-photos.pdf", { type: "application/pdf" });
+    $("share-pdf").hidden = !navigator.canShare?.({ files: [pdfFile] });
     $("pdf-download").href = pdfURL;
     $("pdf-download").download = "COMPASS-photos.pdf";
     $("pdf-download").hidden = false;
@@ -653,10 +658,19 @@ $("save-pdf").addEventListener("click", async () => {
     $("preparing-title").textContent = "Getting photos ready";
   }
 });
+$("share-pdf").addEventListener("click", async () => {
+  if (!pdfFile) return;
+  try {
+    await navigator.share({ files: [pdfFile], title: "COMPASS photo sheet" });
+  } catch (error) {
+    if (error.name !== "AbortError") announce("Sharing could not open. Tap Download PDF instead, then open it in Files to print.");
+  }
+});
 $("print").addEventListener("click", () => {
   if (!state.photos.length || state.busy || !previewReady) return;
   // Decoding finishes before enabling Print; call synchronously to retain Safari's user activation.
   try {
+    announce("If the print sheet does not open, use Save PDF, then Share PDF or Download PDF to print from Files.");
     window.print();
   } catch {
     announce(

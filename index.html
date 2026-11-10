@@ -10,7 +10,7 @@
     />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-title" content="COMPASS Photo Printing" />
-    <title>COMPASS Photo Printing · v1.03</title>
+    <title>COMPASS Photo Printing · v1.04</title>
     <link rel="icon" href="icons/icon.svg" type="image/svg+xml" />
     <link rel="apple-touch-icon" href="icons/icon-192.png" />
     <link rel="manifest" href="manifest.webmanifest" />
@@ -119,6 +119,7 @@
             <span id="page-count"></span>
           </div>
           <div id="pages"></div>
+          <p class="preview-note screen-only">If Print does not open, tap Save PDF. Then use Share PDF or Download PDF to save or print from Files.</p>
           <p id="preview-note" class="preview-note screen-only" hidden>
             Each photo shown here will print once. Use Copies for teammates to
             add more.
@@ -169,6 +170,7 @@
       </div>
       <div class="footer-actions">
         <button id="save-pdf" class="button secondary" disabled>Save PDF</button>
+        <button id="share-pdf" class="button secondary" hidden>Share PDF</button>
         <a id="pdf-download" class="button secondary" hidden>Download PDF</a>
         <button id="print" class="button primary" disabled>
           <span aria-hidden="true">4 · ▤</span> Print
@@ -177,7 +179,7 @@
       </div>
     </footer>
     <div class="version screen-only">
-      COMPASS PHOTO PRINTING <span>v1.03</span>
+      COMPASS PHOTO PRINTING <span>v1.04</span>
     </div>
     <dialog
       id="editor"

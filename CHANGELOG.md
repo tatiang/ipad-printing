@@ -1,3 +1,5 @@
+Nov 10, 2026 — v1.04 — Add native PDF sharing when supported and visible recovery instructions for failed print handoffs.
+
 Nov 5, 2026 — HEAD — Add Save PDF fallback (v1.03)
 - Generate local Letter PDFs with current crops, rotations, layouts and copies.
 - Add explicit Download PDF action for iPad browsers; retain native Print.

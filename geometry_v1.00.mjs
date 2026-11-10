@@ -1,4 +1,4 @@
-export const VERSION = "v1.03";
+export const VERSION = "v1.04";
 export const LAYOUTS = {
   1: [1, 1],
   2: [1, 2],
